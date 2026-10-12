@@ -83,7 +83,7 @@
                         {{ $dash['absentToday'] }}
                     </span>
                     <span class="min-w-0 flex-1 text-sm {{ $dash['absentToday'] === 0 ? 'text-gray-400' : 'font-medium text-gray-900' }}">
-                        Not clocked in today
+                        No start time today
                     </span>
                 </div>
             </div>
@@ -228,6 +228,9 @@
             </table>
         </div>
     </div>
+
+    {{-- Recent Activity --}}
+    <x-recent-activity :activities="$dash['recentActivity']" title="Team Activity" />
 
     {{-- Announcements (full width; the calendar row sits below) --}}
     <div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Concerns\BuildsCalendarPanels;
 use App\Http\Controllers\Concerns\BuildsManagerDashboard;
 use App\Http\Controllers\Concerns\BuildsOrgDashboard;
+use App\Models\Activity;
 use App\Models\Announcement;
 use App\Models\Employee;
 use App\Models\Holiday;
@@ -93,6 +94,8 @@ class HomeController extends Controller
             // This employee's own milestones (birthday, anniversary, their leave).
             'upcoming' => $this->personalUpcoming($employee),
             // Goals HR has assigned to this employee, least complete first.
+            'recentActivity' => Activity::where('user_id', $employee->user_id)
+                ->latestFirst()->take(6)->get(),
             'myGoals' => $employee->goals()->active()
                 ->orderBy('progress')->orderByRaw('due_date IS NULL, due_date')->take(5)->get(),
         ];

@@ -5,6 +5,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeProfileController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\HolidayController;
 use App\Http\Controllers\HomeController;
@@ -25,6 +26,9 @@ Route::get('/dashboard', [HomeController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // Activity log — everyone sees their own; admin/HR see all (ActivityController scopes it).
+    Route::get('/activity', [ActivityController::class, 'index'])->name('activity.index');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

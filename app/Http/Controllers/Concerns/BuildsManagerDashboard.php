@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use App\Models\Activity;
 use App\Models\Announcement;
 use App\Models\Employee;
 use App\Models\Goal;
@@ -76,6 +77,10 @@ trait BuildsManagerDashboard
             'calendar' => $this->calendarEvents(),
             'agenda' => $this->upcomingAgenda(),
             'birthdays' => $this->teamBirthdays($team),
+            // The manager's own actions plus those of their reports.
+            'recentActivity' => Activity::with('user')
+                ->whereIn('user_id', $team->pluck('user_id')->push($manager->id)->filter()->all())
+                ->latestFirst()->take(6)->get(),
         ];
     }
 

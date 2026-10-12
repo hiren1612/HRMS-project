@@ -262,6 +262,9 @@
                     </div>
                 </div>
 
+                {{-- 7. Recent Activity --}}
+                <x-recent-activity :activities="$empDash['recentActivity']" title="My Recent Activity" />
+
                 {{-- 6. My Goals | Upcoming | Company Announcements --}}
                 <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
 

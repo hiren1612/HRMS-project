@@ -213,6 +213,9 @@
         @endif
     </div>
 
+    {{-- Recent Activity across the organisation --}}
+    <x-recent-activity :activities="$dash['recentActivity']" />
+
     {{-- Bottom area: Employee Status | Announcements | Upcoming Holidays --}}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 

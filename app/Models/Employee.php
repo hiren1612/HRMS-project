@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Employee extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
     public const STATUS_ACTIVE = 'active';
     public const STATUS_INACTIVE = 'inactive';
@@ -159,5 +161,13 @@ class Employee extends Model
     public function getFullNameAttribute(): string
     {
         return $this->user?->name ?? '—';
+    }
+
+    /**
+     * Employees are known by the person, not the row id.
+     */
+    public function activityLabel(): string
+    {
+        return $this->user?->name ?? $this->employee_code ?? ('#' . $this->getKey());
     }
 }

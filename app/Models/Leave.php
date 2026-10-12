@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\Concerns\LogsActivity;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Leave extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
     public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
@@ -126,5 +128,37 @@ class Leave extends Model
     public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
+    }
+
+    /**
+     * e.g. "Paid Leave (18 Jun)".
+     */
+    public function activityLabel(): string
+    {
+        return $this->typeLabel() . ' (' . $this->start_date->format('d M') . ')';
+    }
+
+    /**
+     * A leave's interesting moments are the request and the decision, not a
+     * bare "updated".
+     *
+     * @return array{0: string, 1: string}
+     */
+    protected function activityEntry(string $verb): array
+    {
+        $actor = auth()->user()->name;
+        $owner = $this->employee?->user?->name;
+
+        if ($verb === 'created') {
+            return ['leave.requested', $actor . ' requested ' . $this->activityLabel()];
+        }
+
+        if ($verb === 'updated' && $this->wasChanged('status')) {
+            $whose = $owner ? $owner . "'s" : 'a';
+
+            return ['leave.' . $this->status, $actor . ' ' . $this->status . ' ' . $whose . ' ' . $this->activityLabel()];
+        }
+
+        return $this->defaultActivityEntry($verb);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Concerns;
 
+use App\Models\Activity;
 use App\Models\Announcement;
 use App\Models\Attendance;
 use App\Models\Employee;
@@ -115,6 +116,7 @@ trait BuildsOrgDashboard
             'hrActions' => $this->hrActions(),
             'hrBriefing' => $this->hrBriefing(),
             'systemHealth' => $this->systemHealth(),
+            'recentActivity' => Activity::with('user')->latestFirst()->take(6)->get(),
         ];
     }
 
