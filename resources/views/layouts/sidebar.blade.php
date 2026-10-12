@@ -6,9 +6,7 @@
 
     {{-- Brand --}}
     <div class="h-16 flex items-center gap-2 px-5 border-b border-gray-100">
-        <span class="h-9 w-9 rounded-lg flex items-center justify-center text-white" style="background-color: #2f80ed;">
-            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-14h2m-2 4h2m6-4h2m-2 4h2"/></svg>
-        </span>
+        <img src="{{ asset('images/favicon.png') }}" alt="" class="h-9 w-9 rounded-lg object-contain">
         <span class="text-lg font-bold text-gray-800">{{ config('app.name', 'HRMS') }}</span>
     </div>
 
@@ -51,6 +49,10 @@
             <x-sidebar-link :href="route('holidays.index')" :active="request()->routeIs('holidays.*')">
                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 Holidays
+            </x-sidebar-link>
+            <x-sidebar-link :href="route('activity.index')" :active="request()->routeIs('activity.*')">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Activity Log
             </x-sidebar-link>
         </div>
 

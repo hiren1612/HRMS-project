@@ -7,6 +7,9 @@
 
         <title>{{ config('app.name', 'HRMS') }}</title>
 
+        <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">
+
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
@@ -27,10 +30,9 @@
 
                 {{-- Brand --}}
                 <div class="relative flex items-center gap-3">
-                    <span class="h-11 w-11 rounded-xl bg-white flex items-center justify-center" style="color:#2f80ed;">
-                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3m4-14h2m-2 4h2m6-4h2m-2 4h2"/></svg>
+                    <span class="rounded-xl bg-white px-3 py-2 inline-flex items-center">
+                        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" class="h-7 w-auto">
                     </span>
-                    <span class="text-2xl font-bold">{{ config('app.name', 'HRMS') }}</span>
                 </div>
 
                 {{-- Headline --}}
@@ -61,11 +63,8 @@
             <div class="flex-1 flex items-center justify-center px-6 py-12 bg-gray-50">
                 <div class="w-full max-w-md">
                     {{-- Brand for small screens --}}
-                    <div class="lg:hidden flex items-center justify-center gap-2 mb-8">
-                        <span class="h-10 w-10 rounded-xl flex items-center justify-center text-white" style="background-color:#2f80ed;">
-                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2M5 21H3"/></svg>
-                        </span>
-                        <span class="text-xl font-bold text-gray-800">{{ config('app.name', 'HRMS') }}</span>
+                    <div class="lg:hidden flex items-center justify-center mb-8">
+                        <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" class="h-8 w-auto">
                     </div>
 
                     {{ $slot }}
