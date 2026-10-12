@@ -15,8 +15,8 @@
                         <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <th class="px-6 py-3">Employee</th>
                             <th class="px-6 py-3">Date</th>
-                            <th class="px-6 py-3">Clock In</th>
-                            <th class="px-6 py-3">Clock Out</th>
+                            <th class="px-6 py-3">Start Time</th>
+                            <th class="px-6 py-3">End Time</th>
                             <th class="px-6 py-3">Worked</th>
                             <th class="px-6 py-3">Break</th>
                             <th class="px-6 py-3">Productive</th>

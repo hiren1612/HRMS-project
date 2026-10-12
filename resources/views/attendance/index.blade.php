@@ -20,7 +20,7 @@
 
             @unless ($employee)
                 <div class="rounded-md bg-yellow-50 p-4 text-sm text-yellow-800">
-                    You don't have an employee profile yet, so you can't clock in. Please contact HR.
+                    You don't have an employee profile yet, so you can't record a start time. Please contact HR.
                 </div>
             @endunless
 
@@ -100,17 +100,17 @@
                         {{-- Clock out --}}
                         <form method="POST" action="{{ route('attendance.clockOut') }}">
                             @csrf
-                            <button class="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-500">Clock Out</button>
+                            <button class="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-500">End Time</button>
                         </form>
                     </div>
                     <x-input-error :messages="$errors->get('break_minutes')" class="mt-1" />
                 @else
-                    <p class="text-gray-600">You are currently <strong>clocked out</strong>.</p>
+                    <p class="text-gray-600">You have not started your day yet.</p>
                     <form method="POST" action="{{ route('attendance.clockIn') }}">
                         @csrf
                         <button @disabled(! $employee)
                             class="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-500 disabled:opacity-50">
-                            Clock In
+                            Start Time
                         </button>
                     </form>
                 @endif
@@ -122,8 +122,8 @@
                     <thead class="bg-gray-50">
                         <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <th class="px-6 py-3">Date</th>
-                            <th class="px-6 py-3">Clock In</th>
-                            <th class="px-6 py-3">Clock Out</th>
+                            <th class="px-6 py-3">Start Time</th>
+                            <th class="px-6 py-3">End Time</th>
                             <th class="px-6 py-3">Worked</th>
                             <th class="px-6 py-3">Break</th>
                             <th class="px-6 py-3">Productive</th>
@@ -147,7 +147,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">No attendance records yet. Clock in to get started.</td>
+                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">No attendance records yet. Record a start time to get going.</td>
                             </tr>
                         @endforelse
                     </tbody>
