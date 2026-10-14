@@ -25,7 +25,7 @@
                     <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                         @forelse ($attendances as $record)
                             <tr>
-                                <td class="px-6 py-4 font-medium text-gray-900">{{ $record->employee->user->name ?? '—' }}</td>
+                                <td class="px-6 py-4 font-medium text-gray-900">{{ $record->employee->displayName() }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">{{ $record->date->format('d M Y') }}</td>
                                 <td class="px-6 py-4">{{ $record->clock_in->format('h:i A') }}</td>
                                 <td class="px-6 py-4">{{ $record->clock_out?->format('h:i A') ?? '—' }}</td>

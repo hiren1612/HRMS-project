@@ -235,7 +235,7 @@
                                               style="background-color:#2f80ed;">{{ $bemp->user?->initial() ?? '?' }}</span>
                                     @endif
                                     <div class="min-w-0 flex-1">
-                                        <div class="text-sm font-semibold text-gray-900 truncate">{{ $bemp->user?->name ?? '—' }}</div>
+                                        <div class="text-sm font-semibold text-gray-900 truncate">{{ $bemp->displayName() }}</div>
                                         <div class="text-xs text-gray-500 truncate">{{ $bemp->designation ?: 'Employee' }}</div>
                                     </div>
                                     @if ($b['daysUntil'] === 0 && $bemp->user?->email)

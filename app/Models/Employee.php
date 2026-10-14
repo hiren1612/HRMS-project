@@ -29,6 +29,7 @@ class Employee extends Model
      */
     protected $fillable = [
         'user_id',
+        'name',
         'employee_code',
         'phone',
         'address',
@@ -163,11 +164,23 @@ class Employee extends Model
         return $this->user?->name ?? '—';
     }
 
+
+    /**
+     * The name to show for this employee.
+     *
+     * Prefers the name on the employee record itself; falls back to the
+     * linked login account for rows created before employees carried a name.
+     */
+    public function displayName(): string
+    {
+        return $this->name ?: ($this->user?->name ?? $this->employee_code ?? '—');
+    }
+
     /**
      * Employees are known by the person, not the row id.
      */
     public function activityLabel(): string
     {
-        return $this->user?->name ?? $this->employee_code ?? ('#' . $this->getKey());
+        return $this->displayName();
     }
 }

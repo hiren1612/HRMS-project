@@ -20,20 +20,16 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-    {{-- Linked user account --}}
+    {{-- Employee name --}}
     <div>
-        <x-input-label for="user_id" :value="__('User account')" />
-        <select name="user_id" id="user_id"
-                class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-            <option value="">— Select a user —</option>
-            @foreach ($users as $user)
-                <option value="{{ $user->id }}"
-                    @selected(old('user_id', $employee?->user_id) == $user->id)>
-                    {{ $user->name }} ({{ $user->email }})
-                </option>
-            @endforeach
-        </select>
-        <x-input-error :messages="$errors->get('user_id')" class="mt-2" />
+        <x-input-label for="name" :value="__('Employee name')" />
+        <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
+                      :value="old('name', $employee?->name ?? $employee?->user?->name)"
+                      required maxlength="150" autofocus />
+        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        @if ($employee?->user)
+            <p class="mt-1 text-xs text-gray-500">Linked login: {{ $employee->user->email }}</p>
+        @endif
     </div>
 
     {{-- Employee code --}}
@@ -85,14 +81,6 @@
         <textarea id="address" name="address" rows="3"
                   class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('address', $employee?->address) }}</textarea>
         <x-input-error :messages="$errors->get('address')" class="mt-2" />
-    </div>
-
-    {{-- Salary --}}
-    <div>
-        <x-input-label for="salary" :value="__('Salary')" />
-        <x-text-input id="salary" name="salary" type="number" step="0.01" min="0" class="mt-1 block w-full"
-                      :value="old('salary', $employee?->salary)" />
-        <x-input-error :messages="$errors->get('salary')" class="mt-2" />
     </div>
 
     {{-- Hire date --}}

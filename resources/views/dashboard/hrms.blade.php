@@ -95,7 +95,7 @@
                             <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                                 @forelse ($recentLeaves as $leave)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 font-medium text-gray-900">{{ $leave->employee->user->name ?? '—' }}</td>
+                                        <td class="px-6 py-4 font-medium text-gray-900">{{ $leave->employee->displayName() }}</td>
                                         <td class="px-6 py-4">{{ $leave->typeLabel() }}</td>
                                         <td class="px-6 py-4 text-gray-500 whitespace-nowrap">
                                             {{ $leave->start_date->format('d M') }} – {{ $leave->end_date->format('d M Y') }}

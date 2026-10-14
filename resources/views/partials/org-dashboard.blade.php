@@ -240,7 +240,7 @@
                         @forelse ($dash['employeeList'] as $emp)
                             <tr>
                                 <td class="px-6 py-4 font-medium" style="color:#2f80ed;">{{ $emp->employee_code }}</td>
-                                <td class="px-6 py-4 text-gray-900">{{ $emp->user->name ?? '—' }}</td>
+                                <td class="px-6 py-4 text-gray-900">{{ $emp->displayName() }}</td>
                                 <td class="px-6 py-4">{{ $emp->designation }}</td>
                                 <td class="px-6 py-4">
                                     @if ($emp->status === 'active')
@@ -347,12 +347,12 @@
                     <div class="flex items-center gap-3 rounded-xl p-3 {{ $b['daysUntil'] === 0 ? 'text-white' : 'bg-gray-50' }}"
                          @if ($b['daysUntil'] === 0) style="background-color:#134e5e;" @endif>
                         @if ($emp->user?->profilePhotoUrl())
-                            <img src="{{ $emp->user->profilePhotoUrl() }}" alt="{{ $emp->user->name }}" class="h-10 w-10 rounded-full object-cover">
+                            <img src="{{ $emp->user->profilePhotoUrl() }}" alt="{{ $emp->displayName() }}" class="h-10 w-10 rounded-full object-cover">
                         @else
                             <span class="h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-bold" style="background-color:#2f80ed;">{{ $emp->user?->initial() ?? '?' }}</span>
                         @endif
                         <div class="min-w-0 flex-1">
-                            <div class="text-sm font-semibold {{ $b['daysUntil'] === 0 ? 'text-white' : 'text-gray-900' }} truncate">{{ $emp->user?->name ?? '—' }}</div>
+                            <div class="text-sm font-semibold {{ $b['daysUntil'] === 0 ? 'text-white' : 'text-gray-900' }} truncate">{{ $emp->displayName() }}</div>
                             <div class="text-xs {{ $b['daysUntil'] === 0 ? 'text-white/80' : 'text-gray-500' }} truncate">{{ $emp->designation }}</div>
                         </div>
                         <span class="text-xs font-medium {{ $b['daysUntil'] === 0 ? 'text-white' : 'text-gray-500' }} whitespace-nowrap">

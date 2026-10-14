@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateEmployeeRequest;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class EmployeeController extends Controller
@@ -15,22 +16,40 @@ class EmployeeController extends Controller
      * Display a paginated list of employees.
      * with('user') eager-loads the related user to avoid N+1 queries in the view.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $employees = Employee::with('user')->latest()->paginate(10);
+        $employees = Employee::with('user')
+            // Free-text search across the employee record and the linked account.
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $term = '%' . $request->string('search') . '%';
 
-        return view('employees.index', compact('employees'));
+                $query->where(fn ($q) => $q->where('name', 'like', $term)
+                    ->orWhere('employee_code', 'like', $term)
+                    ->orWhere('designation', 'like', $term)
+                    ->orWhere('department', 'like', $term)
+                    ->orWhere('phone', 'like', $term)
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', $term)
+                        ->orWhere('email', 'like', $term)));
+            })
+            ->when($request->filled('department'), fn ($q) => $q->where('department', $request->string('department')))
+            ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('employees.index', [
+            'employees' => $employees,
+            'departments' => Employee::query()->whereNotNull('department')
+                ->distinct()->orderBy('department')->pluck('department'),
+        ]);
     }
 
     /**
      * Show the form for creating a new employee.
-     * Only users that don't yet have an employee profile can be selected.
      */
     public function create(): View
     {
-        $users = User::doesntHave('employee')->orderBy('name')->get();
-
-        return view('employees.create', ['users' => $users, 'managers' => $this->managerOptions()]);
+        return view('employees.create', ['managers' => $this->managerOptions()]);
     }
 
     /**
@@ -56,17 +75,11 @@ class EmployeeController extends Controller
     }
 
     /**
-     * Show the edit form. Selectable users = those without a profile,
-     * plus the employee's own current user.
+     * Show the edit form.
      */
     public function edit(Employee $employee): View
     {
-        $users = User::doesntHave('employee')
-            ->orWhere('id', $employee->user_id)
-            ->orderBy('name')
-            ->get();
-
-        return view('employees.edit', ['employee' => $employee, 'users' => $users, 'managers' => $this->managerOptions()]);
+        return view('employees.edit', ['employee' => $employee, 'managers' => $this->managerOptions()]);
     }
 
     /**

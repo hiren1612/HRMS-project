@@ -31,6 +31,7 @@ class UpdateEmployeeRequest extends FormRequest
                 'required', 'integer', 'exists:users,id',
                 Rule::unique('employees', 'user_id')->ignore($employee->id),
             ],
+            'name' => ['required', 'string', 'max:150'],
             'employee_code' => [
                 'required', 'string', 'max:50',
                 Rule::unique('employees', 'employee_code')->ignore($employee->id),
@@ -40,7 +41,6 @@ class UpdateEmployeeRequest extends FormRequest
             'designation' => ['required', 'string', 'max:100'],
             'department' => ['required', 'string', 'max:100'],
             'manager_id' => ['nullable', 'integer', 'exists:users,id'],
-            'salary' => ['nullable', 'numeric', 'min:0'],
             'hire_date' => ['required', 'date'],
             'date_of_birth' => ['nullable', 'date', 'before:today'],
             'status' => ['required', Rule::in(Employee::STATUSES)],

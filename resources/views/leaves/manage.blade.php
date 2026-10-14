@@ -25,7 +25,7 @@
                     <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                         @forelse ($pendingLeaves as $leave)
                             <tr>
-                                <td class="px-6 py-4">{{ $leave->employee->user->name ?? '—' }}</td>
+                                <td class="px-6 py-4">{{ $leave->employee->displayName() }}</td>
                                 <td class="px-6 py-4">{{ $leave->typeLabel() }}</td>
                                 <td class="px-6 py-4">{{ $leave->sessionLabel() }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">

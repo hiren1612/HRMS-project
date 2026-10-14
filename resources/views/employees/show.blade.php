@@ -19,7 +19,7 @@
                     </div>
                     <div>
                         <dt class="text-gray-500">Name</dt>
-                        <dd class="font-medium text-gray-900">{{ $employee->user->name ?? '—' }}</dd>
+                        <dd class="font-medium text-gray-900">{{ $employee->displayName() }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500">Email</dt>

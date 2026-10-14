@@ -26,14 +26,13 @@ class StoreEmployeeRequest extends FormRequest
     {
         return [
             // Must point to a real user that doesn't already have a profile.
-            'user_id' => ['required', 'integer', 'exists:users,id', 'unique:employees,user_id'],
+            'name' => ['required', 'string', 'max:150'],
             'employee_code' => ['required', 'string', 'max:50', 'unique:employees,employee_code'],
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
             'designation' => ['required', 'string', 'max:100'],
             'department' => ['required', 'string', 'max:100'],
             'manager_id' => ['nullable', 'integer', 'exists:users,id'],
-            'salary' => ['nullable', 'numeric', 'min:0'],
             'hire_date' => ['required', 'date'],
             'date_of_birth' => ['nullable', 'date', 'before:today'],
             'status' => ['required', Rule::in(Employee::STATUSES)],

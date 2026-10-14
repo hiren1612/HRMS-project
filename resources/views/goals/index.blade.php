@@ -32,7 +32,7 @@
                         @forelse ($goals as $goal)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-6 py-4">
-                                    <div class="font-medium text-gray-900">{{ $goal->employee->user->name ?? '—' }}</div>
+                                    <div class="font-medium text-gray-900">{{ $goal->employee->displayName() }}</div>
                                     <div class="text-xs text-gray-500">{{ $goal->employee->employee_code }}</div>
                                 </td>
                                 <td class="px-6 py-4">

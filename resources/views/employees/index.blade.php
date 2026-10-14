@@ -19,6 +19,41 @@
                 </div>
             @endif
 
+            {{-- Search and filters, above the table --}}
+            <form method="GET" class="bg-white shadow-sm sm:rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="lg:col-span-2">
+                        <x-text-input name="search" type="search" class="block w-full"
+                                      :value="request('search')"
+                                      placeholder="Search name, email, code, designation, department or phone" />
+                    </div>
+
+                    <select name="department" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
+                        <option value="">All departments</option>
+                        @foreach ($departments as $department)
+                            <option value="{{ $department }}" @selected(request('department') === $department)>{{ $department }}</option>
+                        @endforeach
+                    </select>
+
+                    <select name="status" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
+                        <option value="">Any status</option>
+                        @foreach (\App\Models\Employee::STATUSES as $status)
+                            <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst($status) }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mt-3 flex items-center gap-3">
+                    <x-primary-button>Search</x-primary-button>
+                    @if (request()->hasAny(['search', 'department', 'status']))
+                        <a href="{{ route('employees.index') }}" class="text-sm text-gray-600 hover:underline">Clear</a>
+                    @endif
+                    <span class="ml-auto text-sm text-gray-500">
+                        {{ $employees->total() }} {{ Str::plural('employee', $employees->total()) }}
+                    </span>
+                </div>
+            </form>
+
             <div class="bg-white shadow-sm sm:rounded-lg overflow-y-hidden whitespace-nowrap overflow-x-auto w-100">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -35,7 +70,7 @@
                         @forelse ($employees as $employee)
                             <tr>
                                 <td class="px-6 py-4 font-medium">{{ $employee->employee_code }}</td>
-                                <td class="px-6 py-4">{{ $employee->user->name ?? '—' }}</td>
+                                <td class="px-6 py-4">{{ $employee->displayName() }}</td>
                                 <td class="px-6 py-4">{{ $employee->designation }}</td>
                                 <td class="px-6 py-4">{{ $employee->department }}</td>
                                 <td class="px-6 py-4">
@@ -58,7 +93,11 @@
                         @empty
                             <tr>
                                 <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                                    No employees yet. Click “New Employee” to add one.
+                                    @if (request()->hasAny(['search', 'department', 'status']))
+                                        No employees match your search.
+                                    @else
+                                        No employees yet. Click “New Employee” to add one.
+                                    @endif
                                 </td>
                             </tr>
                         @endforelse
