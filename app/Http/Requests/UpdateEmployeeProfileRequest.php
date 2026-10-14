@@ -24,11 +24,11 @@ class UpdateEmployeeProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'designation' => ['required', 'string', 'max:100'],
-            'department' => ['required', 'string', 'max:100'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            // Designation, department and hire date are HR-owned and are not
+            // accepted here: an employee must not be able to re-grade or
+            // re-date their own employment (QA H5).
+            'phone' => ['nullable', 'string', 'regex:/^[0-9+\-\s()]+$/', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
-            'hire_date' => ['required', 'date'],
             'date_of_birth' => ['nullable', 'date', 'before:today'],
         ];
     }

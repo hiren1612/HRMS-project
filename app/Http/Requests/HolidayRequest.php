@@ -23,7 +23,13 @@ class HolidayRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
-            'date' => ['required', 'date'],
+            // One holiday per date (QA M10) - "Diwali" and "Diwali/Deepavali"
+            // both landing on 8 Nov is a data-entry mistake, not two holidays.
+            'date' => [
+                'required', 'date',
+                \Illuminate\Validation\Rule::unique('holidays', 'date')
+                    ->ignore($this->route('holiday')?->id),
+            ],
             'description' => ['nullable', 'string', 'max:1000'],
         ];
     }

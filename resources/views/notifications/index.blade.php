@@ -20,15 +20,18 @@
 
             <div class="bg-white shadow-sm sm:rounded-lg divide-y divide-gray-100">
                 @forelse ($notifications as $notification)
-                    <a href="{{ route('notifications.read', $notification->id) }}"
-                       class="flex items-start gap-3 px-6 py-4 hover:bg-gray-50 {{ $notification->read_at ? '' : 'bg-indigo-50/40' }}">
+                    <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
+                    @csrf
+                    <button type="submit"
+                       class="w-full text-left flex items-start gap-3 px-6 py-4 hover:bg-gray-50 {{ $notification->read_at ? '' : 'bg-indigo-50/40' }}">
                         {{-- Unread dot --}}
                         <span class="mt-1 h-2 w-2 rounded-full {{ $notification->read_at ? 'bg-transparent' : 'bg-indigo-500' }}"></span>
                         <div class="flex-1">
                             <div class="text-sm text-gray-800">{{ $notification->data['message'] ?? 'Notification' }}</div>
                             <div class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</div>
                         </div>
-                    </a>
+                    </button>
+                    </form>
                 @empty
                     <div class="px-6 py-10 text-center text-gray-500">You have no notifications.</div>
                 @endforelse

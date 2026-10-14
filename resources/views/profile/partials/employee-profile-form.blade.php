@@ -33,15 +33,13 @@
 
             <div>
                 <x-input-label for="designation" :value="__('Designation')" />
-                <x-text-input id="designation" name="designation" type="text" class="mt-1 block w-full"
-                              :value="old('designation', $employee?->designation)" required />
+                <p class="mt-1 block w-full rounded-md bg-gray-50 border border-gray-200 px-3 py-2 text-sm text-gray-700">{{ $employee?->designation ?: '— set by HR —' }}</p>
                 <x-input-error :messages="$errors->get('designation')" class="mt-2" />
             </div>
 
             <div>
                 <x-input-label for="department" :value="__('Department')" />
-                <x-text-input id="department" name="department" type="text" class="mt-1 block w-full"
-                              :value="old('department', $employee?->department)" required />
+                <p class="mt-1 block w-full rounded-md bg-gray-50 border border-gray-200 px-3 py-2 text-sm text-gray-700">{{ $employee?->department ?: '— set by HR —' }}</p>
                 <x-input-error :messages="$errors->get('department')" class="mt-2" />
             </div>
 
@@ -54,8 +52,7 @@
 
             <div>
                 <x-input-label for="hire_date" :value="__('Hiring Date')" />
-                <x-text-input id="hire_date" name="hire_date" type="date" class="mt-1 block w-full"
-                              :value="old('hire_date', $employee?->hire_date?->format('Y-m-d'))" required />
+                <p class="mt-1 block w-full rounded-md bg-gray-50 border border-gray-200 px-3 py-2 text-sm text-gray-700">{{ $employee?->hire_date?->format('d M Y') ?? '— set by HR —' }}</p>
                 <x-input-error :messages="$errors->get('hire_date')" class="mt-2" />
             </div>
 

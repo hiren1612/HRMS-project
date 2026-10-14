@@ -16,7 +16,8 @@ class AttendanceController extends Controller
      */
     public function index(Request $request): View
     {
-        if ($request->user()->isAdmin()) {
+        // HR needs the organisation-wide view too, not just their own (QA H7).
+        if ($request->user()->hasAnyRole([\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_HR])) {
             $attendances = Attendance::with('employee.user')
                 ->latest('clock_in')
                 ->paginate(20);
@@ -80,6 +81,16 @@ class AttendanceController extends Controller
 
         if (! $session) {
             return back()->with('error', 'Clock in first before recording break time.');
+        }
+
+        // A break cannot be longer than the time actually worked (QA H2).
+        // For a session still open, measure against the time elapsed so far.
+        $end = $session->clock_out ?? now();
+        $worked = (int) $session->clock_in->diffInMinutes($end);
+
+        if ($validated['break_minutes'] > $worked) {
+            return back()->with('error',
+                "Break of {$validated['break_minutes']} minutes is longer than the {$worked} minutes worked so far.");
         }
 
         $session->update(['break_minutes' => $validated['break_minutes']]);

@@ -75,6 +75,21 @@ class Goal extends Model
     }
 
     /**
+     * A goal at 100% is finished, whatever the form said (QA M13); dropping
+     * back below 100% reopens it.
+     */
+    protected static function bootGoalCompletion(): void
+    {
+        static::saving(function (self $goal) {
+            if ($goal->progress >= 100 && $goal->status === self::STATUS_ACTIVE) {
+                $goal->status = self::STATUS_COMPLETED;
+            } elseif ($goal->progress < 100 && $goal->status === self::STATUS_COMPLETED) {
+                $goal->status = self::STATUS_ACTIVE;
+            }
+        });
+    }
+
+    /**
      * Still active, but its due date has already passed.
      */
     public function isOverdue(): bool

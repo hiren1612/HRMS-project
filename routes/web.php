@@ -50,7 +50,8 @@ Route::middleware('auth')->group(function () {
 
     // In-app notifications (database channel).
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    // POST, not GET: opening a link must not change data (QA M11).
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.readAll');
 
     // Company holidays — every authenticated user can view the list.

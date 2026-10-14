@@ -56,4 +56,34 @@ class StoreLeaveRequest extends FormRequest
             'end_date.after_or_equal' => 'The end date must be the same as or after the start date.',
         ];
     }
+
+    /**
+     * QA H9: the same dates could be booked twice. If both were approved the
+     * day came off the balance twice, so an overlap is refused up front.
+     */
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $employee = $this->user()->employee;
+
+            if (! $employee || ! $this->filled('start_date') || ! $this->filled('end_date')) {
+                return;
+            }
+
+            $clash = $employee->leaves()
+                ->whereIn('status', [Leave::STATUS_PENDING, Leave::STATUS_APPROVED])
+                ->whereDate('start_date', '<=', $this->date('end_date'))
+                ->whereDate('end_date', '>=', $this->date('start_date'))
+                ->first();
+
+            if ($clash) {
+                $validator->errors()->add('start_date', sprintf(
+                    'You already have %s leave from %s to %s. Cancel or amend that request first.',
+                    $clash->status,
+                    $clash->start_date->format('d M Y'),
+                    $clash->end_date->format('d M Y'),
+                ));
+            }
+        });
+    }
 }

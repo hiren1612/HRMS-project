@@ -88,9 +88,9 @@ class GoalController extends Controller
     {
         return Employee::with('user')
             ->get()
-            ->sortBy(fn (Employee $e) => $e->user?->name ?? '')
+            ->sortBy(fn (Employee $e) => $e->displayName())
             ->mapWithKeys(fn (Employee $e) => [
-                $e->id => ($e->user?->name ?? 'Unknown') . ' (' . $e->employee_code . ')',
+                $e->id => $e->displayName() . ' (' . $e->employee_code . ')',
             ])
             ->all();
     }

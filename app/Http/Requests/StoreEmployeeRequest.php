@@ -28,7 +28,7 @@ class StoreEmployeeRequest extends FormRequest
             // Must point to a real user that doesn't already have a profile.
             'name' => ['required', 'string', 'max:150'],
             'employee_code' => ['required', 'string', 'max:50', 'unique:employees,employee_code'],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'regex:/^[0-9+\-\s()]+$/', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
             'designation' => ['required', 'string', 'max:100'],
             'department' => ['required', 'string', 'max:100'],

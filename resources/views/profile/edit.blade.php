@@ -35,7 +35,11 @@
 
             <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                 <div class="max-w-xl">
-                    @include('profile.partials.delete-user-form')
+                    {{-- Staff must not be able to erase their own HR record (QA H4);
+                         HR sets someone to Inactive instead. --}}
+                    @if (Auth::user()->isAdmin())
+                        @include('profile.partials.delete-user-form')
+                    @endif
                 </div>
             </div>
         </div>

@@ -28,6 +28,8 @@
                         <dd class="font-medium text-gray-900">
                             {{ $leave->start_date->format('d M Y') }} – {{ $leave->end_date->format('d M Y') }}
                         </dd>
+                        <dt class="text-gray-500">Days</dt>
+                        <dd class="font-medium text-gray-900">{{ rtrim(rtrim(number_format($leave->dayCount(), 1), '0'), '.') }} {{ $leave->dayCount() == 1 ? 'day' : 'days' }}</dd>
                     </div>
                     <div class="sm:col-span-2">
                         <dt class="text-gray-500">Reason</dt>
@@ -36,7 +38,10 @@
                 </dl>
 
                 <div class="mt-6">
-                    <a href="{{ route('leaves.index') }}" class="text-sm text-gray-600 hover:underline">&larr; Back to my leaves</a>
+                    @php($reviewer = Auth::user()->hasAnyRole([\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_HR, \App\Models\User::ROLE_MANAGER]))
+                    <a href="{{ $reviewer ? route('leaves.manage') : route('leaves.index') }}" class="text-sm text-gray-600 hover:underline">
+                        &larr; {{ $reviewer ? 'Back to leave requests' : 'Back to my leaves' }}
+                    </a>
                 </div>
             </div>
         </div>

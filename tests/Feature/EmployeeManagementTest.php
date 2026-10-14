@@ -160,4 +160,108 @@ class EmployeeManagementTest extends TestCase
         $this->assertNull($recordOnly->user_id);
         $this->assertSame('Just A Record', $recordOnly->displayName());
     }
+
+    // ------------------------------------------------------------- QA fixes
+
+    /**
+     * QA C1: an employee with no login account could not be saved from the
+     * edit form — validation still demanded a user_id.
+     */
+    public function test_an_employee_without_a_login_can_be_edited(): void
+    {
+        $employee = $this->employee(['name' => 'Editable Eve', 'designation' => 'Clerk']);
+
+        $this->actingAs($this->hr())
+            ->patch(route('employees.update', $employee), [
+                'name' => 'Editable Eve',
+                'employee_code' => $employee->employee_code,
+                'designation' => 'Senior Clerk',
+                'department' => 'QA',
+                'hire_date' => '2026-01-01',
+                'status' => Employee::STATUS_INACTIVE,
+            ])
+            ->assertRedirect(route('employees.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('employees', [
+            'id' => $employee->id,
+            'designation' => 'Senior Clerk',
+            'status' => Employee::STATUS_INACTIVE,
+        ]);
+    }
+
+    /** QA M8: a phone number is digits and separators, not letters. */
+    public function test_a_phone_number_cannot_contain_letters(): void
+    {
+        $this->actingAs($this->hr())
+            ->post(route('employees.store'), [
+                'name' => 'Bad Phone',
+                'employee_code' => 'EMP-7777',
+                'designation' => 'Clerk',
+                'department' => 'QA',
+                'phone' => 'abcd',
+                'hire_date' => '2026-01-01',
+                'status' => Employee::STATUS_ACTIVE,
+            ])
+            ->assertSessionHasErrors('phone');
+    }
+
+    public function test_a_normal_phone_number_is_still_accepted(): void
+    {
+        $this->actingAs($this->hr())
+            ->post(route('employees.store'), [
+                'name' => 'Good Phone',
+                'employee_code' => 'EMP-7778',
+                'designation' => 'Clerk',
+                'department' => 'QA',
+                'phone' => '+91 98765 43210',
+                'hire_date' => '2026-01-01',
+                'status' => Employee::STATUS_ACTIVE,
+            ])
+            ->assertSessionHasNoErrors();
+    }
+
+    /** QA H6: public sign-up is closed. */
+    public function test_the_public_register_page_is_gone(): void
+    {
+        $this->get('/register')->assertNotFound();
+        $this->post('/register', [
+            'name' => 'Intruder', 'email' => 'x@y.test',
+            'password' => 'password', 'password_confirmation' => 'password',
+        ])->assertNotFound();
+
+        $this->assertDatabaseMissing('users', ['email' => 'x@y.test']);
+    }
+
+    /** QA H4: staff must not be able to delete their own HR record. */
+    public function test_only_an_admin_sees_the_delete_account_option(): void
+    {
+        $staff = $this->employee(['name' => 'Ordinary Olly']);
+        $staff->user_id = User::factory()->create(['role' => User::ROLE_EMPLOYEE])->id;
+        $staff->save();
+
+        $this->actingAs($staff->user)->get(route('profile.edit'))
+            ->assertOk()->assertDontSee('Delete Account');
+
+        $this->actingAs(User::factory()->create(['role' => User::ROLE_ADMIN]))
+            ->get(route('profile.edit'))->assertOk()->assertSee('Delete Account');
+    }
+
+    /** QA H5: job details are HR-owned, not self-service. */
+    public function test_an_employee_cannot_change_their_own_designation(): void
+    {
+        $user = User::factory()->create(['role' => User::ROLE_EMPLOYEE]);
+        $employee = $this->employee(['name' => 'Self Sam', 'designation' => 'Junior', 'user_id' => $user->id]);
+
+        $this->actingAs($user)->patch(route('profile.employee.update'), [
+            'designation' => 'Chief Executive',
+            'department' => 'Board',
+            'hire_date' => '2000-01-01',
+            'phone' => '123456',
+        ]);
+
+        $employee->refresh();
+        $this->assertSame('Junior', $employee->designation, 'designation must be unchanged');
+        $this->assertSame('QA', $employee->department, 'department must be unchanged');
+    }
 }

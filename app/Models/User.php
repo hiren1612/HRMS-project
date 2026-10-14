@@ -112,9 +112,14 @@ class User extends Authenticatable
      */
     public function profilePhotoUrl(): ?string
     {
-        return $this->profile_photo_path
-            ? Storage::disk('public')->url($this->profile_photo_path)
-            : null;
+        // QA H8: a path can outlive its file (storage not carried across a
+        // deploy). Returning a URL for a missing file renders a broken image;
+        // returning null lets every view fall back to the initials avatar.
+        if (! $this->profile_photo_path || ! Storage::disk('public')->exists($this->profile_photo_path)) {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->profile_photo_path);
     }
 
     /**

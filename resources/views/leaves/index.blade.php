@@ -39,6 +39,7 @@
                             <th class="px-6 py-3">Session</th>
                             <th class="px-6 py-3">From</th>
                             <th class="px-6 py-3">To</th>
+                            <th class="px-6 py-3">Days</th>
                             <th class="px-6 py-3">Reason</th>
                             <th class="px-6 py-3">Status</th>
                             <th class="px-6 py-3 text-right">Actions</th>
@@ -51,6 +52,7 @@
                                 <td class="px-6 py-4">{{ $leave->sessionLabel() }}</td>
                                 <td class="px-6 py-4">{{ $leave->start_date->format('d M Y') }}</td>
                                 <td class="px-6 py-4">{{ $leave->end_date->format('d M Y') }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">{{ rtrim(rtrim(number_format($leave->dayCount(), 1), '0'), '.') }}</td>
                                 <td class="px-6 py-4 max-w-xs truncate" title="{{ $leave->reason }}">{{ $leave->reason ?? '—' }}</td>
                                 <td class="px-6 py-4">
                                     <x-leave-status-badge :status="$leave->status" />

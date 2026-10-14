@@ -149,10 +149,13 @@
                                         @endif
                                     </div>
                                     @forelse ($unread->take(5) as $notification)
-                                        <a href="{{ route('notifications.read', $notification->id) }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100">
-                                            <div>{{ $notification->data['message'] ?? 'Notification' }}</div>
-                                            <div class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</div>
-                                        </a>
+                                        <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
+                                            @csrf
+                                            <button type="submit" class="block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100">
+                                                <div>{{ $notification->data['message'] ?? 'Notification' }}</div>
+                                                <div class="text-xs text-gray-400 mt-1">{{ $notification->created_at->diffForHumans() }}</div>
+                                            </button>
+                                        </form>
                                     @empty
                                         <div class="px-4 py-4 text-sm text-gray-500 text-center">No new notifications</div>
                                     @endforelse

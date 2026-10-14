@@ -27,8 +27,9 @@ class UpdateEmployeeRequest extends FormRequest
         $employee = $this->route('employee');
 
         return [
+            // A login account is optional: an employee can be an HR record only.
             'user_id' => [
-                'required', 'integer', 'exists:users,id',
+                'nullable', 'integer', 'exists:users,id',
                 Rule::unique('employees', 'user_id')->ignore($employee->id),
             ],
             'name' => ['required', 'string', 'max:150'],
@@ -36,7 +37,7 @@ class UpdateEmployeeRequest extends FormRequest
                 'required', 'string', 'max:50',
                 Rule::unique('employees', 'employee_code')->ignore($employee->id),
             ],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'phone' => ['nullable', 'string', 'regex:/^[0-9+\-\s()]+$/', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
             'designation' => ['required', 'string', 'max:100'],
             'department' => ['required', 'string', 'max:100'],
