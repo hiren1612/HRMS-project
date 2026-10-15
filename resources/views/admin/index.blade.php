@@ -39,21 +39,9 @@
             <div class="bg-white shadow-sm sm:rounded-lg overflow-y-hidden whitespace-nowrap overflow-x-auto w-100">
                 <div class="px-6 py-4 border-b flex items-center justify-between gap-3">
                     <h3 class="font-semibold text-gray-800">All Users</h3>
-                    {{-- QA M14: only offer the sync once a token is configured. --}}
-                    @if (config('services.timecamp.token'))
-                    <form method="POST" action="{{ route('admin.timecamp.sync') }}"
-                          onsubmit="return confirm('Import / refresh users from TimeCamp now?');">
-                        @csrf
-                        <button type="submit"
-                                class="inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md text-white hover:opacity-90"
-                                style="background-color:#2f80ed;">
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                            Sync from TimeCamp
-                        </button>
-                    </form>
-                    @else
-                        <p class="text-sm text-gray-500">TimeCamp sync is unavailable &mdash; set <code>TIMECAMP_API_TOKEN</code> in the server <code>.env</code> to enable it.</p>
-                    @endif
+                    {{-- QA M14: TimeCamp sync withdrawn. Time tracking is handled by the
+     separate desktop tracker, so this button pointed at an unused
+     integration. The service and command remain for reference. --}}
                 </div>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">

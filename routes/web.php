@@ -64,6 +64,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/attendance/clock-in', [AttendanceController::class, 'clockIn'])->name('attendance.clockIn');
     Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('attendance.clockOut');
     Route::patch('/attendance/break', [AttendanceController::class, 'break'])->name('attendance.break');
+
+    // QA M7 / H1: organisation-wide export and HR correction of a session.
+    Route::get('/attendance/export', [AttendanceController::class, 'export'])->name('attendance.export');
+    Route::patch('/attendance/{attendance}/correct', [AttendanceController::class, 'correct'])->name('attendance.correct');
 });
 
 // Leave approval area — only managers, HR and admins.

@@ -22,22 +22,27 @@
             @endif
 
             {{-- Search and filters, above the table --}}
-            <form method="GET" class="bg-white shadow-sm sm:rounded-lg p-4 mb-4">
+            <form method="GET" class="bg-white shadow-sm sm:rounded-lg p-4 mb-4"
+                  x-data="{ t: null }"
+                  x-on:input.debounce.400ms="clearTimeout(t); $el.requestSubmit()">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div class="lg:col-span-2">
-                        <x-text-input name="search" type="search" class="block w-full"
+                        <label for="emp-search" class="sr-only">Search employees</label>
+                        <x-text-input id="emp-search" name="search" type="search" class="block w-full"
                                       :value="request('search')"
                                       placeholder="Search name, email, code, designation, department or phone" />
                     </div>
 
-                    <select name="department" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
+                    <label for="emp-dept" class="sr-only">Filter by department</label>
+                    <select id="emp-dept" name="department" aria-label="Filter by department" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
                         <option value="">All departments</option>
                         @foreach ($departments as $department)
                             <option value="{{ $department }}" @selected(request('department') === $department)>{{ $department }}</option>
                         @endforeach
                     </select>
 
-                    <select name="status" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
+                    <label for="emp-status" class="sr-only">Filter by status</label>
+                    <select id="emp-status" name="status" aria-label="Filter by status" class="block w-full border-gray-300 rounded-md shadow-sm text-sm">
                         <option value="">Any status</option>
                         @foreach (\App\Models\Employee::STATUSES as $status)
                             <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst($status) }}</option>

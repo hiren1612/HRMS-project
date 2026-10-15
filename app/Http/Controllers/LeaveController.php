@@ -35,7 +35,22 @@ class LeaveController extends Controller
     {
         $this->authorize('create', Leave::class);
 
-        return view('leaves.create', ['today' => today()->toDateString()]);
+        // QA M5: the picker blocked past dates even though the server now
+        // accepts back-dating by up to a month (sick leave after the fact).
+        $employee = request()->user()->employee;
+
+        return view('leaves.create', [
+            'today' => today()->toDateString(),
+            'earliest' => now()->subMonth()->toDateString(),
+            // QA U3: show what the request will cost before it is submitted.
+            'balances' => $employee ? $employee->leaveBalances() : [],
+            // Weekends and holidays are skipped, so the browser needs to know
+            // which dates do not count (QA M16 + U3).
+            'nonWorkingDates' => \App\Models\Holiday::whereBetween('date', [
+                now()->subMonth()->toDateString(),
+                now()->addYear()->toDateString(),
+            ])->pluck('date')->map(fn ($d) => $d->toDateString())->values(),
+        ]);
     }
 
     /**

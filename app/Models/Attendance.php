@@ -19,6 +19,8 @@ class Attendance extends Model
         'clock_in',
         'clock_out',
         'break_minutes',
+        'closed_by',
+        'correction_note',
     ];
 
     /**
@@ -32,6 +34,36 @@ class Attendance extends Model
             'clock_out' => 'datetime',
             'break_minutes' => 'integer',
         ];
+    }
+
+    /**
+     * The longest a single session is treated as real work (QA H1).
+     * Anything beyond this is a forgotten clock-out, not a 97-hour shift.
+     */
+    public const MAX_SESSION_MINUTES = 720; // 12 hours
+
+    public const CLOSED_MANUAL = 'manual';
+    public const CLOSED_AUTO = 'auto';
+    public const CLOSED_HR = 'hr';
+
+    /**
+     * A session longer than a plausible working day, i.e. someone forgot to
+     * clock out. Shown as a warning so HR can correct the times.
+     */
+    public function isSuspicious(): bool
+    {
+        return $this->worked_minutes !== null
+            && $this->worked_minutes > self::MAX_SESSION_MINUTES;
+    }
+
+    /**
+     * Did the session end on a later day than it started? The attendance
+     * tables show only a time, which hid the 97-hour rows (QA H1).
+     */
+    public function spansDays(): bool
+    {
+        return $this->clock_out !== null
+            && ! $this->clock_in->isSameDay($this->clock_out);
     }
 
     /**
@@ -88,7 +120,11 @@ class Attendance extends Model
             return null;
         }
 
-        return max(0, $this->worked_minutes - $this->break_minutes);
+        // Capped at a plausible day: a forgotten clock-out must not add 97
+        // hours to a weekly total. isSuspicious() flags it for correction.
+        $worked = min($this->worked_minutes, self::MAX_SESSION_MINUTES);
+
+        return max(0, $worked - $this->break_minutes);
     }
 
     /**

@@ -18,7 +18,24 @@
                 @endif
 
                 <form method="POST" action="{{ route('leaves.store') }}"
-                      x-data="{ multiple: {{ old('multiple_days') ? 'true' : 'false' }} }" class="space-y-6">
+                      x-data="{ multiple: {{ old('multiple_days') ? 'true' : 'false' }} }" class="space-y-6"
+                      x-data="{
+                          start: '', end: '', multi: false,
+                          holidays: {{ Js::from($nonWorkingDates) }},
+                          get days() {
+                              if (!this.start) return 0;
+                              const a = new Date(this.start);
+                              const b = new Date(this.multi && this.end ? this.end : this.start);
+                              if (isNaN(a) || isNaN(b) || b < a) return 0;
+                              let n = 0;
+                              for (let d = new Date(a); d <= b; d.setDate(d.getDate() + 1)) {
+                                  const iso = d.toISOString().slice(0, 10);
+                                  const wd = d.getDay();
+                                  if (wd !== 0 && wd !== 6 && !this.holidays.includes(iso)) n++;
+                              }
+                              return n;
+                          }
+                      }">
                     @csrf
 
                     {{-- Apply for multiple days --}}
@@ -34,8 +51,8 @@
                             <x-input-label for="start_date">
                                 <span x-text="multiple ? 'Start date' : 'Date'">Date</span> <span class="text-red-500">*</span>
                             </x-input-label>
-                            <x-text-input id="start_date" name="start_date" type="date" class="mt-1 block w-full"
-                                          :min="$today" :value="old('start_date')" required />
+                            <x-text-input id="start_date" name="start_date" type="date" x-model="start" class="mt-1 block w-full"
+                                          :min="$earliest" :value="old('start_date')" required />
                             <x-input-error :messages="$errors->get('start_date')" class="mt-2" />
                         </div>
 
@@ -54,8 +71,8 @@
                         {{-- End date (only when applying for multiple days) --}}
                         <div x-show="multiple" style="display:none;">
                             <x-input-label for="end_date">{{ __('End date') }} <span class="text-red-500">*</span></x-input-label>
-                            <x-text-input id="end_date" name="end_date" type="date" class="mt-1 block w-full"
-                                          :min="$today" :value="old('end_date')" />
+                            <x-text-input id="end_date" name="end_date" type="date" x-model="end" class="mt-1 block w-full"
+                                          :min="$earliest" :value="old('end_date')" />
                             <x-input-error :messages="$errors->get('end_date')" class="mt-2" />
                         </div>
                     </div>
@@ -89,6 +106,23 @@
                             {{ __('Cancel') }}
                         </a>
                     </div>
+                
+    {{-- QA U3: what this request will actually cost, before Apply --}}
+    <div class="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4" x-show="days > 0" x-cloak>
+        <p class="text-sm text-gray-800">
+            This uses <span class="font-semibold" x-text="days"></span>
+            <span x-text="days === 1 ? 'working day' : 'working days'"></span>
+            <span class="text-gray-500">(weekends and public holidays are not counted)</span>
+        </p>
+        @foreach ($balances as $balance)
+            @if (! ($balance['carry'] ?? false))
+                <p class="mt-1 text-xs text-gray-600">
+                    {{ $balance['label'] }}: <span class="font-semibold">{{ $balance['remaining'] }}</span> of {{ $balance['allowance'] }} left
+                </p>
+            @endif
+        @endforeach
+    </div>
+
                 </form>
 
             </div>

@@ -124,7 +124,15 @@ class QaFollowUpTest extends TestCase
             ->assertOk()
             ->assertSee('Days');
 
-        $this->assertSame(5.0, Leave::first()->dayCount());
+        // Since M16 the count is working days, so a span crossing a weekend
+        // is worth fewer days than its calendar length.
+        $expected = Leave::workingDaysBetween(
+            now()->addDays(10)->startOfDay(),
+            now()->addDays(14)->startOfDay()
+        );
+
+        $this->assertSame($expected, Leave::first()->dayCount());
+        $this->assertLessThanOrEqual(5.0, $expected);
     }
 
     public function test_a_half_day_counts_as_half(): void

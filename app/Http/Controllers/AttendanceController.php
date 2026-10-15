@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Attendance;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\View\View;
 
@@ -38,7 +39,8 @@ class AttendanceController extends Controller
         // day at all (QA N1, and the Admin half of M7).
         if ($request->user()->hasAnyRole([\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_HR])) {
             return view('attendance.admin', [
-                'attendances' => Attendance::with('employee.user')->latest('clock_in')->paginate(20),
+                'attendances' => $this->orgAttendance($request)->paginate(20)->withQueryString(),
+                'employees' => \App\Models\Employee::orderBy('name')->pluck('name', 'id'),
                 'employee' => $employee,
                 'openSession' => $openSession,
             ]);
@@ -144,5 +146,80 @@ class AttendanceController extends Controller
         $openSession->update(['clock_out' => now()]);
 
         return back()->with('success', 'Clocked out at ' . now()->format('h:i A') . '. Worked ' . $openSession->workedLabel() . '.');
+    }
+
+    /**
+     * The organisation-wide attendance query, with the filters QA asked for
+     * (M7): by employee, by date range, and only sessions needing attention.
+     */
+    private function orgAttendance(Request $request)
+    {
+        return Attendance::with('employee.user')
+            ->when($request->filled('employee'), fn ($q) => $q->where('employee_id', $request->integer('employee')))
+            ->when($request->filled('from'), fn ($q) => $q->whereDate('date', '>=', $request->date('from')))
+            ->when($request->filled('to'), fn ($q) => $q->whereDate('date', '<=', $request->date('to')))
+            ->when($request->boolean('flagged'), fn ($q) => $q->where(fn ($w) => $w
+                ->whereNull('clock_out')
+                ->orWhere('closed_by', Attendance::CLOSED_AUTO)))
+            ->latest('clock_in');
+    }
+
+    /**
+     * CSV export of the same filtered list (QA M7).
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        abort_unless($request->user()->hasAnyRole([\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_HR]), 403);
+
+        $rows = $this->orgAttendance($request)->get();
+        $name = 'attendance-' . now()->format('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Employee', 'Code', 'Date', 'Start', 'End', 'Break (min)', 'Productive (min)', 'Closed by', 'Flagged']);
+
+            foreach ($rows as $row) {
+                fputcsv($out, [
+                    $row->employee?->displayName() ?? '-',
+                    $row->employee?->employee_code ?? '-',
+                    $row->date?->format('Y-m-d'),
+                    $row->clock_in?->format('Y-m-d H:i'),
+                    $row->clock_out?->format('Y-m-d H:i') ?? 'open',
+                    $row->break_minutes,
+                    $row->productive_minutes ?? '',
+                    $row->closed_by ?? 'manual',
+                    $row->isSuspicious() ? 'yes' : '',
+                ]);
+            }
+
+            fclose($out);
+        }, $name, ['Content-Type' => 'text/csv']);
+    }
+
+    /**
+     * HR corrects a wrong clock-in or clock-out, with a reason that lands in
+     * the activity log (QA H1 and the HR-correction suggestion).
+     */
+    public function correct(Request $request, Attendance $attendance): RedirectResponse
+    {
+        abort_unless($request->user()->hasAnyRole([\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_HR]), 403);
+
+        $data = $request->validate([
+            'clock_in' => ['required', 'date'],
+            'clock_out' => ['nullable', 'date', 'after:clock_in'],
+            'break_minutes' => ['required', 'integer', 'min:0', 'max:1440'],
+            'correction_note' => ['required', 'string', 'max:500'],
+        ], [], ['correction_note' => 'reason']);
+
+        $attendance->update([
+            'clock_in' => $data['clock_in'],
+            'clock_out' => $data['clock_out'],
+            'date' => \Illuminate\Support\Carbon::parse($data['clock_in'])->toDateString(),
+            'break_minutes' => $data['break_minutes'],
+            'closed_by' => Attendance::CLOSED_HR,
+            'correction_note' => $data['correction_note'],
+        ]);
+
+        return back()->with('success', 'Attendance corrected.');
     }
 }

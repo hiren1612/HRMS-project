@@ -99,7 +99,32 @@ class Leave extends Model
             return 0.5;
         }
 
-        return $this->start_date->diffInDays($this->end_date) + 1;
+        return self::workingDaysBetween($this->start_date, $this->end_date);
+    }
+
+    /**
+     * Working days in an inclusive range, skipping weekends and any public
+     * holiday (QA M16). A 20-23 Nov request spanning a weekend is 2 days of
+     * leave, not 4.
+     */
+    public static function workingDaysBetween(\Carbon\Carbon $from, \Carbon\Carbon $to): float
+    {
+        $holidays = Holiday::whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->pluck('date')
+            ->map(fn ($d) => $d->toDateString())
+            ->flip();
+
+        $days = 0;
+        $day = $from->copy()->startOfDay();
+
+        while ($day->lte($to)) {
+            if (! $day->isWeekend() && ! $holidays->has($day->toDateString())) {
+                $days++;
+            }
+            $day = $day->addDay();
+        }
+
+        return (float) $days;
     }
 
     /** @var list<string> */
