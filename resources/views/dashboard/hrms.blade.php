@@ -85,7 +85,7 @@
                         <a href="{{ route('leaves.manage') }}" class="text-sm font-medium hover:underline" style="color: #2f80ed;">View all</a>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
+                        <table class="rt min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     <th class="px-6 py-3">Employee</th>
@@ -97,12 +97,12 @@
                             <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                                 @forelse ($recentLeaves as $leave)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 font-medium text-gray-900">{{ $leave->employee->displayName() }}</td>
-                                        <td class="px-6 py-4">{{ $leave->typeLabel() }}</td>
-                                        <td class="px-6 py-4 text-gray-500 whitespace-nowrap">
-                                            {{ $leave->start_date->format('d M') }} – {{ $leave->end_date->format('d M Y') }}
+                                        <td data-label="Employee" class="px-6 py-4 font-medium text-gray-900">{{ $leave->employee->displayName() }}</td>
+                                        <td data-label="Type" class="px-6 py-4">{{ $leave->typeLabel() }}</td>
+                                        <td data-label="Dates" class="px-6 py-4 text-gray-500 whitespace-nowrap">
+                                            {{ $leave->start_date->asShortDate() }} – {{ $leave->end_date->asDate() }}
                                         </td>
-                                        <td class="px-6 py-4"><x-leave-status-badge :status="$leave->status" /></td>
+                                        <td data-label="Status" class="px-6 py-4"><x-leave-status-badge :status="$leave->status" /></td>
                                     </tr>
                                 @empty
                                     <tr>

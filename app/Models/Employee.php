@@ -23,6 +23,50 @@ class Employee extends Model
     ];
 
     /**
+     * QA M9: the departments offered on the employee form.
+     *
+     * Values already in the database are merged in, so an employee saved
+     * before the list existed still shows their own department rather than
+     * silently switching to the first option.
+     *
+     * @return list<string>
+     */
+    public static function departments(): array
+    {
+        return self::listWithExisting('departments', 'department');
+    }
+
+    /**
+     * QA M9: the designations offered on the employee form.
+     *
+     * @return list<string>
+     */
+    public static function designations(): array
+    {
+        return self::listWithExisting('designations', 'designation');
+    }
+
+    /**
+     * Merge a configured list with whatever is already stored in that column.
+     *
+     * @return list<string>
+     */
+    private static function listWithExisting(string $configKey, string $column): array
+    {
+        $stored = static::query()
+            ->whereNotNull($column)
+            ->where($column, '!=', '')
+            ->distinct()
+            ->pluck($column)
+            ->all();
+
+        $all = array_unique(array_merge(config('hrms.' . $configKey, []), $stored));
+        sort($all, SORT_NATURAL | SORT_FLAG_CASE);
+
+        return array_values($all);
+    }
+
+    /**
      * Mass-assignable attributes.
      *
      * @var list<string>

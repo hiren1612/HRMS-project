@@ -71,7 +71,7 @@ trait BuildsManagerDashboard
             'goalsOnTrack' => $goals->count() - $atRisk->count(),
             'goalsAtRisk' => $atRisk->count(),
             'team' => $this->teamRows($team),
-            'announcements' => Announcement::latest()->take(4)->get(),
+            'announcements' => Announcement::visible()->latest()->take(4)->get(),
             // Same calendar panels the employee dashboard uses, with birthdays
             // narrowed to this manager's own reports.
             'calendar' => $this->calendarEvents(),

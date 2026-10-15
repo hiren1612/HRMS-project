@@ -2,12 +2,23 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\ResolvesOtherOptions;
 use App\Models\Employee;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreEmployeeRequest extends FormRequest
 {
+    use ResolvesOtherOptions;
+
+    /**
+     * QA M9: fold the "Other…" dropdown choice back into the real field.
+     */
+    protected function prepareForValidation(): void
+    {
+        $this->resolveOtherOptions(['department', 'designation']);
+    }
+
     /**
      * Authorization is handled by the route middleware (role:admin,hr),
      * so we just allow the request to proceed to validation here.

@@ -52,7 +52,7 @@
 
             <div>
                 <x-input-label for="hire_date" :value="__('Hiring Date')" />
-                <p class="mt-1 block w-full rounded-md bg-gray-50 border border-gray-200 px-3 py-2 text-sm text-gray-700">{{ $employee?->hire_date?->format('d M Y') ?? '— set by HR —' }}</p>
+                <p class="mt-1 block w-full rounded-md bg-gray-50 border border-gray-200 px-3 py-2 text-sm text-gray-700">{{ $employee?->hire_date?->asDate() ?? '— set by HR —' }}</p>
                 <x-input-error :messages="$errors->get('hire_date')" class="mt-2" />
             </div>
 

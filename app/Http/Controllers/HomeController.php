@@ -82,7 +82,7 @@ class HomeController extends Controller
             'pendingLeaves' => $employee->leaves()->where('status', Leave::STATUS_PENDING)->count(),
             'recentLeaves' => $employee->leaves()->latest()->take(5)->get(),
             'upcomingHolidays' => Holiday::whereDate('date', '>=', today())->orderBy('date')->take(5)->get(),
-            'announcements' => Announcement::latest()->take(5)->get(),
+            'announcements' => Announcement::visible()->latest()->take(5)->get(),
             // Upcoming meetings + birthdays (shared widgets, also on the org dashboard).
             'schedules' => Schedule::whereDate('meeting_date', '>=', today())
                 ->orderBy('meeting_date')->orderBy('start_time')->take(5)->get(),

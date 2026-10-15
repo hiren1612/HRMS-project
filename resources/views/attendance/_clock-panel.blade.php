@@ -4,7 +4,7 @@
 {{-- Today's status + actions --}}
 <div class="bg-white shadow-sm sm:rounded-lg p-6 space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-2">
-        <h3 class="text-sm font-semibold text-gray-500 uppercase">Today &mdash; {{ now()->format('l, d M Y') }}</h3>
+        <h3 class="text-sm font-semibold text-gray-500 uppercase">Today &mdash; {{ now()->asDateWithFullDay() }}</h3>
 
         {{-- Live clock (HH:MM:SS) — ticks every second in your local time --}}
         <div x-data="{ time: '' }"
@@ -22,9 +22,9 @@
     @if ($openSession)
         <p class="text-gray-800">
             <span class="inline-block h-2 w-2 rounded-full bg-green-500 align-middle"></span>
-            Clocked in at <strong>{{ $openSession->clock_in->format('h:i A') }}</strong>
-            @if ($openSession->break_minutes > 0)
-                &middot; Break: <strong>{{ $openSession->break_minutes }} min</strong>
+            Clocked in at <strong>{{ $openSession->clock_in->asTime() }}</strong>
+            @if ($openSession->breakMinutesSoFar() > 0)
+                &middot; Break: <strong>{{ $openSession->breakMinutesSoFar() }} min</strong>
             @endif
         </p>
 
@@ -46,25 +46,67 @@
             <span class="text-2xl font-mono font-bold text-indigo-700 tabular-nums" x-text="elapsed">0h 00m 00s</span>
         </div>
 
-        <div class="flex flex-wrap items-end gap-6">
-            {{-- Break time entry --}}
-            <form method="POST" action="{{ route('attendance.break') }}" class="flex items-end gap-2">
-                @csrf @method('PATCH')
-                <div>
-                    <x-input-label for="break_minutes" :value="__('Break time (minutes)')" />
-                    <x-text-input id="break_minutes" name="break_minutes" type="number" min="0" max="1440"
-                                  class="mt-1 block w-40" :value="old('break_minutes', $openSession->break_minutes)" />
-                </div>
-                <button class="px-4 py-2 bg-gray-700 text-white text-sm rounded-md hover:bg-gray-600">Save Break</button>
-            </form>
+        {{-- QA U10: breaks are timed, not typed in afterwards. While a break is
+             running the panel says so and counts it up, so nobody has to
+             remember how long they were away. --}}
+        @if ($openSession->isOnBreak())
+            <div x-data="{
+                    away: '',
+                    start: {{ $openSession->break_started_at->timestamp }} * 1000,
+                    tick() {
+                        const diff = Math.max(0, Math.floor((Date.now() - this.start) / 1000));
+                        const m = Math.floor(diff / 60);
+                        const s = diff % 60;
+                        this.away = m + 'm ' + String(s).padStart(2, '0') + 's';
+                    }
+                 }"
+                 x-init="tick(); setInterval(() => tick(), 1000)"
+                 class="flex flex-wrap items-center gap-3 rounded-lg bg-amber-50 px-4 py-3">
+                <span class="inline-block h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                <span class="text-sm font-semibold text-amber-800">On a break since {{ $openSession->break_started_at->asTime() }}</span>
+                <span class="font-mono text-xl font-bold text-amber-700 tabular-nums" x-text="away">0m 00s</span>
+            </div>
+        @endif
 
-            {{-- Clock out --}}
+        <div class="flex flex-wrap items-center gap-3">
+            @if ($openSession->isOnBreak())
+                <form method="POST" action="{{ route('attendance.break.end') }}">
+                    @csrf
+                    <button class="px-5 py-2 bg-amber-600 text-white text-sm font-semibold rounded-md hover:bg-amber-500">
+                        End Break
+                    </button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('attendance.break.start') }}">
+                    @csrf
+                    <button class="px-5 py-2 bg-amber-600 text-white text-sm font-semibold rounded-md hover:bg-amber-500">
+                        Start Break
+                    </button>
+                </form>
+            @endif
+
+            {{-- Clock out. Ending the day while on a break banks the break first. --}}
             <form method="POST" action="{{ route('attendance.clockOut') }}">
                 @csrf
                 <button class="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-500">End Time</button>
             </form>
+
+            {{-- Still available for the odd correction, but tucked away so the
+                 two buttons above are the obvious thing to use. --}}
+            <details class="w-full sm:w-auto">
+                <summary class="cursor-pointer text-xs text-gray-500 hover:text-gray-700">Adjust break total by hand</summary>
+                <form method="POST" action="{{ route('attendance.break') }}" class="mt-2 flex items-end gap-2">
+                    @csrf @method('PATCH')
+                    <div>
+                        <x-input-label for="break_minutes" :value="__('Total break today (minutes)')" />
+                        <x-text-input id="break_minutes" name="break_minutes" type="number" min="0" max="1440"
+                                      class="mt-1 block w-40" :value="old('break_minutes', $openSession->break_minutes)" />
+                    </div>
+                    <button class="px-4 py-2 bg-gray-700 text-white text-sm rounded-md hover:bg-gray-600">Save</button>
+                </form>
+                <x-input-error :messages="$errors->get('break_minutes')" class="mt-1" />
+            </details>
         </div>
-        <x-input-error :messages="$errors->get('break_minutes')" class="mt-1" />
     @else
         {{-- QA M6: a finished day used to say "you have not started yet".
              Report what actually happened, and label any further session. --}}

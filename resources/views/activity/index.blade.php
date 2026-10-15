@@ -77,7 +77,7 @@
                         </div>
                         <div class="shrink-0 text-right">
                             <div class="text-xs text-gray-500 whitespace-nowrap">{{ $activity->created_at->diffForHumans() }}</div>
-                            <div class="text-xs text-gray-400 whitespace-nowrap">{{ $activity->created_at->format('d M Y, H:i') }}</div>
+                            <div class="text-xs text-gray-400 whitespace-nowrap">{{ $activity->created_at->asDateTime() }}</div>
                         </div>
                     </div>
                 @empty

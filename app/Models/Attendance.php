@@ -19,6 +19,7 @@ class Attendance extends Model
         'clock_in',
         'clock_out',
         'break_minutes',
+        'break_started_at',
         'closed_by',
         'correction_note',
     ];
@@ -33,6 +34,7 @@ class Attendance extends Model
             'clock_in' => 'datetime',
             'clock_out' => 'datetime',
             'break_minutes' => 'integer',
+            'break_started_at' => 'datetime',
         ];
     }
 
@@ -64,6 +66,33 @@ class Attendance extends Model
     {
         return $this->clock_out !== null
             && ! $this->clock_in->isSameDay($this->clock_out);
+    }
+
+    /**
+     * QA U10: is this person on a break right now?
+     */
+    public function isOnBreak(): bool
+    {
+        return $this->break_started_at !== null;
+    }
+
+    /**
+     * Minutes elapsed in the break currently running (0 when not on one).
+     */
+    public function currentBreakMinutes(): int
+    {
+        return $this->isOnBreak()
+            ? (int) $this->break_started_at->diffInMinutes(now())
+            : 0;
+    }
+
+    /**
+     * Total break time including a break still in progress, which is what
+     * the panel should show while someone is away.
+     */
+    public function breakMinutesSoFar(): int
+    {
+        return $this->break_minutes + $this->currentBreakMinutes();
     }
 
     /**

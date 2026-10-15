@@ -2,16 +2,21 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        {{-- QA U4: on a phone the title, country picker and two buttons used to
+             sit on one line and run off the screen. They now wrap, and the
+             import form takes the full width on the smallest screens. --}}
+        <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Company Holidays') }}</h2>
             @if (auth()->user()->hasAnyRole(['admin', 'hr']))
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                     {{-- Import festivals from Google's public holiday calendar --}}
-                    <form method="POST" action="{{ route('holidays.importGoogle') }}" class="flex items-center gap-2"
-                          onsubmit="return confirm('Import public holidays / festivals from Google Calendar for the selected country?');">
+                    <form method="POST" action="{{ route('holidays.importGoogle') }}"
+                          class="flex flex-1 sm:flex-none items-center gap-2"
+                          x-data="{ busy: false }" x-on:submit="busy = true">
                         @csrf
-                        <select name="country"
-                                class="text-xs border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2">
+                        <label for="country" class="sr-only">Country to import holidays for</label>
+                        <select id="country" name="country"
+                                class="min-w-0 flex-1 sm:flex-none text-xs border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 py-2">
                             <option value="in">🇮🇳 India</option>
                             <option value="us">🇺🇸 United States</option>
                             <option value="uk">🇬🇧 United Kingdom</option>
@@ -22,18 +27,14 @@
                             <option value="ph">🇵🇭 Philippines</option>
                             <option value="za">🇿🇦 South Africa</option>
                         </select>
-                        <button type="submit"
-                                class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold uppercase rounded-md text-white hover:opacity-90"
-                                style="background-color:#2f80ed;">
+                        {{-- Secondary: importing is a helper, adding a holiday is the main action. --}}
+                        <x-page-action tone="secondary" x-bind:disabled="busy" class="whitespace-nowrap">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                            Import from Google
-                        </button>
+                            <span x-text="busy ? 'Importing…' : 'Import'"></span>
+                        </x-page-action>
                     </form>
 
-                    <a href="{{ route('holidays.create') }}"
-                       class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-xs font-semibold uppercase rounded-md hover:bg-gray-700">
-                        + Add Holiday
-                    </a>
+                    <x-page-action :href="route('holidays.create')" class="whitespace-nowrap">+ Add Holiday</x-page-action>
                 </div>
             @endif
         </div>
@@ -66,21 +67,27 @@
                     </div>
                 </div>
 
-                {{-- Weekday headers --}}
+                {{-- Weekday headers. Three letters is as much as fits on a phone,
+                     so the full name is announced to screen readers instead. --}}
                 <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-500 uppercase border-b border-gray-200 pb-2">
-                    <div>Sun</div>
-                    <div>Mon</div>
-                    <div>Tue</div>
-                    <div>Wed</div>
-                    <div>Thu</div>
-                    <div>Fri</div>
-                    <div>Sat</div>
+                    @foreach (['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as $weekday)
+                        <div>
+                            <span aria-hidden="true">{{ Str::substr($weekday, 0, 3) }}</span>
+                            <span class="sr-only">{{ $weekday }}</span>
+                        </div>
+                    @endforeach
                 </div>
 
-                {{-- Day cells --}}
-                <div class="grid grid-cols-7">
+                {{-- Day cells.
+                     QA U12: the holiday name was 11px and truncated to a few
+                     characters, so it could not be read. It now wraps at the
+                     normal small size and the cells are tall enough to hold it.
+                     QA U4: on a phone a seven-column grid leaves roughly 45px
+                     per day, so below sm the month becomes a list of the days
+                     that actually have something on them. --}}
+                <div class="hidden sm:grid grid-cols-7">
                     @foreach ($calendar as $cell)
-                        <div class="min-h-[96px] border border-gray-100 p-1.5 {{ $cell['cellClass'] }}">
+                        <div class="min-h-[112px] border border-gray-100 p-2 {{ $cell['cellClass'] }}">
                             {{-- Date number --}}
                             <div class="flex justify-end">
                                 <span class="flex items-center justify-center h-7 w-7 text-sm {{ $cell['numClass'] }}">
@@ -92,8 +99,7 @@
                             @if ($cell['holidays']->isNotEmpty())
                                 <div class="mt-1 space-y-1">
                                     @foreach ($cell['holidays'] as $holiday)
-                                        <div class="text-[11px] leading-tight bg-green-100 text-green-800 rounded px-1 py-0.5 truncate"
-                                             title="{{ $holiday->title }}">
+                                        <div class="rounded bg-green-100 px-1.5 py-1 text-xs font-medium leading-snug text-green-800 break-words">
                                             {{ $holiday->title }}
                                         </div>
                                     @endforeach
@@ -101,6 +107,26 @@
                             @endif
                         </div>
                     @endforeach
+                </div>
+
+                {{-- Phone view of the same month. --}}
+                <div class="sm:hidden divide-y divide-gray-100">
+                    @forelse ($holidays as $holiday)
+                        <div class="flex items-start gap-3 py-3">
+                            <div class="flex-none w-14 text-center">
+                                <div class="text-lg font-bold text-gray-800 leading-none">{{ $holiday->date->format('d') }}</div>
+                                <div class="text-xs text-gray-500">{{ $holiday->date->format('D') }}</div>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold text-gray-900">{{ $holiday->title }}</div>
+                                @if ($holiday->description)
+                                    <div class="text-xs text-gray-600">{{ $holiday->description }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <p class="py-6 text-center text-sm text-gray-500">Nothing in {{ $cursor->format('F Y') }}.</p>
+                    @endforelse
                 </div>
 
                 <div class="mt-3 flex items-center gap-4 text-xs text-gray-500">
@@ -118,7 +144,7 @@
                 <div class="px-6 py-4 border-b">
                     <h3 class="font-semibold text-gray-800">Holidays in {{ $cursor->format('F Y') }}</h3>
                 </div>
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="rt min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <th class="px-6 py-3">Date</th>
@@ -133,23 +159,21 @@
                     <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                         @forelse ($holidays as $holiday)
                             <tr class="{{ $holiday->isUpcoming() ? '' : 'opacity-60' }}">
-                                <td class="px-6 py-4 font-medium whitespace-nowrap">
-                                    {{ $holiday->date->format('d M Y') }}
+                                <td data-label="Date" class="px-6 py-4 font-medium whitespace-nowrap">
+                                    {{ $holiday->date->asDate() }}
                                     @if ($holiday->isUpcoming())
                                         <span class="ml-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">Upcoming</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">{{ $holiday->date->format('l') }}</td>
-                                <td class="px-6 py-4 font-medium text-gray-900">{{ $holiday->title }}</td>
-                                <td class="px-6 py-4 text-gray-600">{{ $holiday->description ?? '—' }}</td>
+                                <td data-label="Day" class="px-6 py-4">{{ $holiday->date->format('l') }}</td>
+                                <td data-label="Holiday" class="px-6 py-4 font-medium text-gray-900">{{ $holiday->title }}</td>
+                                <td data-label="Description" class="px-6 py-4 text-gray-600">{{ $holiday->description ?? '—' }}</td>
                                 @if ($canManage)
-                                    <td class="px-6 py-4 text-right space-x-3 whitespace-nowrap">
+                                    <td data-label="" class="px-6 py-4 text-right space-x-3 whitespace-nowrap">
                                         <a href="{{ route('holidays.edit', $holiday) }}" class="text-blue-600 hover:underline">Edit</a>
-                                        <form action="{{ route('holidays.destroy', $holiday) }}" method="POST" class="inline"
-                                              onsubmit="return confirm('Delete this holiday?');">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:underline">Delete</button>
-                                        </form>
+                                        <x-confirm-action :action="route('holidays.destroy', $holiday)"
+                                                          title="Delete this holiday?"
+                                                          :message="$holiday->title . ' on ' . $holiday->date->asDate() . ' will stop counting as a holiday, so leave taken across that day will use an extra day.'" />
                                     </td>
                                 @endif
                             </tr>

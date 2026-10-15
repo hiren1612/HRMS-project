@@ -36,14 +36,14 @@
             </div>
 
             {{-- Users table --}}
-            <div class="bg-white shadow-sm sm:rounded-lg overflow-y-hidden whitespace-nowrap overflow-x-auto w-100">
+            <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
                 <div class="px-6 py-4 border-b flex items-center justify-between gap-3">
                     <h3 class="font-semibold text-gray-800">All Users</h3>
                     {{-- QA M14: TimeCamp sync withdrawn. Time tracking is handled by the
      separate desktop tracker, so this button pointed at an unused
      integration. The service and command remain for reference. --}}
                 </div>
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="rt min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <th class="px-6 py-3">Name</th>
@@ -55,21 +55,21 @@
                     <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                         @forelse ($users as $user)
                             <tr>
-                                <td class="px-6 py-4 font-medium">
+                                <td data-label="Name" class="px-6 py-4 font-medium">
                                     {{ $user->name }}
                                     @if ($user->is(auth()->user()))
                                         <span class="ml-1 text-xs text-gray-400">(you)</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">{{ $user->email }}</td>
-                                <td class="px-6 py-4">
+                                <td data-label="Email" class="px-6 py-4">{{ $user->email }}</td>
+                                <td data-label="Employee Profile" class="px-6 py-4">
                                     @if ($user->employee)
                                         <span class="text-green-700">{{ $user->employee->employee_code }}</span>
                                     @else
                                         <span class="text-gray-400">—</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">
+                                <td data-label="Role" class="px-6 py-4">
                                     @if ($user->is(auth()->user()))
                                         {{-- Can't change your own role --}}
                                         <span class="px-2 py-0.5 rounded-full text-xs font-semibold uppercase bg-red-100 text-red-800">

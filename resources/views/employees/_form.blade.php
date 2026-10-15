@@ -18,11 +18,13 @@
     </div>
 @endif
 
+<p class="mb-4 text-xs text-gray-500">Fields marked <span class="text-red-600">*</span> are required.</p>
+
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
     {{-- Employee name --}}
     <div>
-        <x-input-label for="name" :value="__('Employee name')" />
+        <x-input-label for="name" :value="__('Employee name')" required />
         <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                       :value="old('name', $employee?->name ?? $employee?->user?->name)"
                       required maxlength="150" autofocus />
@@ -34,27 +36,21 @@
 
     {{-- Employee code --}}
     <div>
-        <x-input-label for="employee_code" :value="__('Employee code')" />
+        <x-input-label for="employee_code" :value="__('Employee code')" required />
         <x-text-input id="employee_code" name="employee_code" type="text" class="mt-1 block w-full"
                       :value="old('employee_code', $employee?->employee_code)" placeholder="EMP-0001" />
         <x-input-error :messages="$errors->get('employee_code')" class="mt-2" />
     </div>
 
-    {{-- Designation --}}
-    <div>
-        <x-input-label for="designation" :value="__('Designation')" />
-        <x-text-input id="designation" name="designation" type="text" class="mt-1 block w-full"
-                      :value="old('designation', $employee?->designation)" />
-        <x-input-error :messages="$errors->get('designation')" class="mt-2" />
-    </div>
+    {{-- Designation (QA M9: dropdown, was free text) --}}
+    <x-select-or-other name="designation" :label="__('Designation')" required
+                       :options="\App\Models\Employee::designations()"
+                       :selected="$employee?->designation" />
 
-    {{-- Department --}}
-    <div>
-        <x-input-label for="department" :value="__('Department')" />
-        <x-text-input id="department" name="department" type="text" class="mt-1 block w-full"
-                      :value="old('department', $employee?->department)" />
-        <x-input-error :messages="$errors->get('department')" class="mt-2" />
-    </div>
+    {{-- Department (QA M9: dropdown, was free text) --}}
+    <x-select-or-other name="department" :label="__('Department')" required
+                       :options="\App\Models\Employee::departments()"
+                       :selected="$employee?->department" />
 
     <div>
         <x-input-label for="manager_id" :value="__('Reports To')" />
@@ -85,7 +81,7 @@
 
     {{-- Hire date --}}
     <div>
-        <x-input-label for="hire_date" :value="__('Hire date')" />
+        <x-input-label for="hire_date" :value="__('Hire date')" required />
         <x-text-input id="hire_date" name="hire_date" type="date" class="mt-1 block w-full"
                       :value="old('hire_date', $employee?->hire_date?->format('Y-m-d'))" />
         <x-input-error :messages="$errors->get('hire_date')" class="mt-2" />
@@ -101,7 +97,7 @@
 
     {{-- Status --}}
     <div>
-        <x-input-label for="status" :value="__('Status')" />
+        <x-input-label for="status" :value="__('Status')" required />
         <select name="status" id="status"
                 class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
             @foreach (\App\Models\Employee::STATUSES as $status)

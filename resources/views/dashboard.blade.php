@@ -118,7 +118,7 @@
                                 <tr>
                                     <td class="px-6 py-4">{{ $leave->typeLabel() }}</td>
                                     <td class="px-6 py-4">{{ $leave->sessionLabel() }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leave->start_date->format('d M') }} – {{ $leave->end_date->format('d M Y') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ $leave->start_date->asShortDate() }} – {{ $leave->end_date->asDate() }}</td>
                                     <td class="px-6 py-4"><x-leave-status-badge :status="$leave->status" /></td>
                                 </tr>
                             @empty
@@ -198,7 +198,7 @@
                                         <div class="text-xs text-gray-500 truncate">{{ $item['subtitle'] }}</div>
                                     </div>
                                     <div class="shrink-0 text-right">
-                                        <div class="text-xs text-gray-400 whitespace-nowrap">{{ $item['date']->format('d/m/Y') }}</div>
+                                        <div class="text-xs text-gray-400 whitespace-nowrap">{{ $item['date']->asDate() }}</div>
                                         @if ($item['link'])
                                             <a href="{{ $item['link'] }}" target="_blank" rel="noopener"
                                                class="text-xs font-semibold hover:underline" style="color:#2f80ed;">Join</a>
@@ -249,7 +249,7 @@
                                         </a>
                                     @else
                                         <span class="shrink-0 text-xs text-gray-400 whitespace-nowrap">
-                                            {{ $b['daysUntil'] === 1 ? 'Tomorrow' : $b['date']->format('d/m/Y') }}
+                                            {{ $b['daysUntil'] === 1 ? 'Tomorrow' : $b['date']->asDate() }}
                                         </span>
                                     @endif
                                 </div>
@@ -286,7 +286,7 @@
                                 </div>
                                 @if ($goal->due_date)
                                     <div class="mt-1 text-xs {{ $overdue ? 'text-red-600 font-medium' : 'text-gray-500' }}">
-                                        Due {{ $goal->due_date->format('d M Y') }}@if ($overdue) &middot; overdue @endif
+                                        Due {{ $goal->due_date->asDate() }}@if ($overdue) &middot; overdue @endif
                                     </div>
                                 @endif
                             </div>
@@ -315,7 +315,7 @@
                                 <div class="min-w-0 flex-1">
                                     <div class="text-sm font-semibold text-gray-900 truncate">{{ $item['label'] }}</div>
                                     <div class="text-xs text-gray-500 truncate">
-                                        {{ $item['date']->format('d M Y') }}@if ($item['meta']) &middot; {{ $item['meta'] }}@endif
+                                        {{ $item['date']->asDate() }}@if ($item['meta']) &middot; {{ $item['meta'] }}@endif
                                     </div>
                                 </div>
                                 <span class="shrink-0 text-xs font-medium whitespace-nowrap {{ $days <= 7 ? 'text-gray-900' : 'text-gray-400' }}">

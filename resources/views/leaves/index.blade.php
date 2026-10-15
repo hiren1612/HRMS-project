@@ -2,13 +2,10 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-wrap items-center justify-between gap-3">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('My Leaves') }}</h2>
             @can('create', \App\Models\Leave::class)
-                <a href="{{ route('leaves.create') }}"
-                   class="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-xs font-semibold uppercase rounded-md hover:bg-gray-700">
-                    + Apply for Leave
-                </a>
+                <x-page-action :href="route('leaves.create')">+ Apply for Leave</x-page-action>
             @endcan
         </div>
     </x-slot>
@@ -33,8 +30,8 @@
                 <x-leave-balance :employee="$employee" />
             </div>
 
-            <div class="bg-white shadow-sm sm:rounded-lg overflow-y-hidden whitespace-nowrap overflow-x-auto w-100">
-                <table class="min-w-full divide-y divide-gray-200">
+            <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
+                <table class="rt min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <th class="px-6 py-3">Type</th>
@@ -50,24 +47,25 @@
                     <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                         @forelse ($leaves as $leave)
                             <tr>
-                                <td class="px-6 py-4">{{ $leave->typeLabel() }}</td>
-                                <td class="px-6 py-4">{{ $leave->sessionLabel() }}</td>
-                                <td class="px-6 py-4">{{ $leave->start_date->format('d M Y') }}</td>
-                                <td class="px-6 py-4">{{ $leave->end_date->format('d M Y') }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ rtrim(rtrim(number_format($leave->dayCount(), 1), '0'), '.') }}</td>
-                                <td class="px-6 py-4 max-w-xs truncate" title="{{ $leave->reason }}">{{ $leave->reason ?? '—' }}</td>
-                                <td class="px-6 py-4">
+                                <td data-label="Type" class="px-6 py-4">{{ $leave->typeLabel() }}</td>
+                                <td data-label="Session" class="px-6 py-4">{{ $leave->sessionLabel() }}</td>
+                                <td data-label="From" class="px-6 py-4">{{ $leave->start_date->asDate() }}</td>
+                                <td data-label="To" class="px-6 py-4">{{ $leave->end_date->asDate() }}</td>
+                                <td data-label="Days" class="px-6 py-4 whitespace-nowrap">{{ rtrim(rtrim(number_format($leave->dayCount(), 1), '0'), '.') }}</td>
+                                <td data-label="Reason" class="px-6 py-4 max-w-xs truncate" title="{{ $leave->reason }}">{{ $leave->reason ?? '—' }}</td>
+                                <td data-label="Status" class="px-6 py-4">
                                     <x-leave-status-badge :status="$leave->status" />
                                 </td>
-                                <td class="px-6 py-4 text-right">
+                                <td data-label="" class="px-6 py-4 text-right">
                                     <a href="{{ route('leaves.show', $leave) }}" class="text-indigo-600 hover:underline">View</a>
                                     @if ($leave->isPending())
                                         {{-- QA M4: withdraw a request that has not been decided. --}}
-                                        <form method="POST" action="{{ route('leaves.cancel', $leave) }}" class="inline ml-3"
-                                              onsubmit="return confirm('Cancel this leave request?');">
-                                            @csrf @method('PATCH')
-                                            <button class="text-red-600 hover:underline">Cancel</button>
-                                        </form>
+                                        <span class="ml-3">
+                                            <x-confirm-action :action="route('leaves.cancel', $leave)" method="PATCH"
+                                                              label="Cancel" confirm="Withdraw request"
+                                                              title="Withdraw this leave request?"
+                                                              message="The request will be withdrawn and the days returned to your balance." />
+                                        </span>
                                     @endif
                                 </td>
                             </tr>

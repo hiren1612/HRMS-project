@@ -18,16 +18,37 @@
                     </svg>
                 </div>
             @endif
+            {{-- QA U9: the greeting was shouted in capitals with a stray space
+                 before the exclamation mark, and the card asked you to review
+                 leave requests even when there were none. --}}
             <div class="mt-4 text-center">
-                <h3 class="text-lg font-bold text-gray-900">HELLO {{ strtoupper(Auth::user()->name) }} !</h3>
+                <h3 class="text-lg font-bold text-gray-900">
+                    {{ now()->hour < 12 ? 'Good morning' : (now()->hour < 17 ? 'Good afternoon' : 'Good evening') }},
+                    {{ Str::before(Auth::user()->name, ' ') ?: Auth::user()->name }}
+                </h3>
                 <p class="mt-2 text-sm text-gray-600">
-                    You have <span class="font-semibold" style="color: #2563eb;">{{ $dash['pendingTotal'] }}</span>
-                    pending leave request{{ $dash['pendingTotal'] === 1 ? '' : 's' }} to review today.
+                    @if ($dash['pendingTotal'] > 0)
+                        <span class="font-semibold" style="color: #2563eb;">{{ $dash['pendingTotal'] }}</span>
+                        leave {{ Str::plural('request', $dash['pendingTotal']) }}
+                        {{ $dash['pendingTotal'] === 1 ? 'is' : 'are' }} waiting for your decision.
+                    @else
+                        Nothing is waiting for your decision today.
+                    @endif
                 </p>
             </div>
-            <a href="{{ route('leaves.manage') }}"
-               class="mt-5 inline-flex justify-center px-5 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90"
-               style="background-color: #2f80ed;">Review it</a>
+
+            @if ($dash['pendingTotal'] > 0)
+                <a href="{{ route('leaves.manage') }}"
+                   class="mt-5 inline-flex justify-center px-5 py-2 rounded-lg text-sm font-semibold text-white hover:opacity-90"
+                   style="background-color: #2f80ed;">
+                    Review {{ $dash['pendingTotal'] === 1 ? 'it' : 'them' }}
+                </a>
+            @else
+                <a href="{{ route('leaves.manage') }}"
+                   class="mt-5 inline-flex justify-center px-5 py-2 rounded-lg border border-gray-300 bg-white text-sm font-semibold text-gray-700 hover:bg-gray-50">
+                    View leave requests
+                </a>
+            @endif
         </div>
 
         {{-- Middle: stat cards + performance chart --}}
@@ -70,7 +91,7 @@
                     </h3>
                     <span class="inline-flex items-center gap-2 text-xs text-gray-500 border border-gray-200 rounded-lg px-3 py-1.5">
                         <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                        {{ today()->format('d M, Y') }}
+                        {{ today()->asDate() }}
                     </span>
                 </div>
 
@@ -106,19 +127,33 @@
         </div>
 
         {{-- Right: Total Employee donut --}}
+        {{-- QA U9: the ring had an empty hole and no total, so the one number
+             the card is named after was the one number it did not show. The
+             figure also has to be readable with charts blocked or switched
+             off, hence the plain text in the middle rather than a plugin. --}}
+        @php($headcount = $dash['designations']->sum('total'))
         <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm p-6">
-            <h3 class="font-semibold text-gray-800 mb-2">Total Employee</h3>
-            <div class="relative">
-                <canvas id="empDonut" height="160"></canvas>
+            <h3 class="font-semibold text-gray-800 mb-2">Employees by Role</h3>
+
+            <div class="relative h-44">
+                <canvas id="empDonut" role="img"
+                        aria-label="{{ $headcount }} employees, split by designation; the same figures are listed below."></canvas>
+                <div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-3xl font-bold leading-none text-gray-900">{{ $headcount }}</span>
+                    <span class="text-xs uppercase tracking-wide text-gray-500">
+                        {{ Str::plural('employee', $headcount) }}
+                    </span>
+                </div>
             </div>
+
             <div class="mt-4 space-y-2">
                 @forelse ($dash['designations'] as $d)
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="inline-flex items-center gap-2 text-gray-700">
-                            <span class="h-2.5 w-2.5 rounded-full" style="background-color: {{ $palette[$loop->index % count($palette)] }};"></span>
-                            {{ $d->designation }}
+                    <div class="flex items-center justify-between gap-3 text-sm">
+                        <span class="inline-flex min-w-0 items-center gap-2 text-gray-700">
+                            <span class="h-2.5 w-2.5 flex-none rounded-full" style="background-color: {{ $palette[$loop->index % count($palette)] }};"></span>
+                            <span class="truncate" title="{{ $d->designation }}">{{ $d->designation }}</span>
                         </span>
-                        <span class="font-medium text-gray-900">{{ $d->total }}</span>
+                        <span class="flex-none font-medium text-gray-900">{{ $d->total }}</span>
                     </div>
                 @empty
                     <p class="text-sm text-gray-500">No employees yet.</p>
@@ -173,7 +208,7 @@
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m0 0h2a2 2 0 012 2v9a2 2 0 01-2 2h-2m0-13v13M9 8h4m-4 4h4m-4 4h2"/></svg>
                 </span>
                 <h3 class="font-semibold text-gray-800">{{ $panelRole }} Briefing</h3>
-                <span class="ml-auto text-xs text-gray-400">{{ now()->format('d M Y') }}</span>
+                <span class="ml-auto text-xs text-gray-400">{{ now()->asDate() }}</span>
             </div>
 
             <ul class="space-y-2.5">
@@ -286,7 +321,7 @@
                 @forelse ($dash['upcomingHolidays'] as $h)
                     <div class="text-sm">
                         <div class="font-medium text-gray-800">{{ $h->title }}</div>
-                        <div class="text-xs text-gray-500">{{ $h->date->format('d M Y') }} ({{ $h->date->format('D') }})</div>
+                        <div class="text-xs text-gray-500">{{ $h->date->asDate() }} ({{ $h->date->format('D') }})</div>
                     </div>
                 @empty
                     <p class="text-sm text-gray-500">No upcoming holidays.</p>
@@ -314,7 +349,7 @@
                         <div class="mt-2 flex flex-wrap items-center gap-x-8 gap-y-1 text-sm text-gray-500">
                             <span class="inline-flex items-center gap-2">
                                 <svg class="h-4 w-4" style="color:#2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                {{ $meeting->meeting_date->format('D, d M Y') }}
+                                {{ $meeting->meeting_date->asDateWithDay() }}
                             </span>
                             <span class="inline-flex items-center gap-2">
                                 <svg class="h-4 w-4" style="color:#2f80ed;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -361,7 +396,7 @@
                             @elseif ($b['daysUntil'] === 1)
                                 Tomorrow
                             @else
-                                {{ $b['date']->format('d M') }}
+                                {{ $b['date']->asShortDate() }}
                             @endif
                         </span>
                     </div>
@@ -405,7 +440,7 @@
                     labels: @json($dash['designations']->pluck('designation')),
                     datasets: [{ data: @json($dash['designations']->pluck('total')), backgroundColor: @json($palette), borderWidth: 0 }]
                 },
-                options: { responsive: true, cutout: '70%', plugins: { legend: { display: false } } }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: false } } }
             });
         }
     });

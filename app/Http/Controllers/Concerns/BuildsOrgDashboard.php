@@ -104,7 +104,7 @@ trait BuildsOrgDashboard
             'employeeList' => Employee::with('user')->latest('id')->take(8)->get(),
             'pendingLeaves' => Leave::with('employee.user')
                 ->where('status', Leave::STATUS_PENDING)->upcoming()->oldest()->take(5)->get(),
-            'announcements' => Announcement::latest()->take(5)->get(),
+            'announcements' => Announcement::visible()->latest()->take(5)->get(),
             'upcomingHolidays' => Holiday::whereDate('date', '>=', today())
                 ->orderBy('date')->take(5)->get(),
             // Upcoming interview/meeting schedules (today onward).

@@ -26,12 +26,10 @@
             <x-input-error :messages="$errors->get('photo')" />
 
             @if ($url)
-                <form method="POST" action="{{ route('profile.photo.destroy') }}"
-                      onsubmit="return confirm('Remove your profile photo?');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="text-sm text-red-600 hover:underline">Remove photo</button>
-                </form>
+                <x-confirm-action :action="route('profile.photo.destroy')"
+                                  label="Remove photo" confirm="Remove photo"
+                                  title="Remove your profile photo?"
+                                  message="Your initials will be shown instead. You can upload a new photo at any time." />
             @endif
 
             @if (session('status') === 'photo-updated')

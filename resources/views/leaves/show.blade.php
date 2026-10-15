@@ -26,7 +26,7 @@
                     <div>
                         <dt class="text-gray-500">Dates</dt>
                         <dd class="font-medium text-gray-900">
-                            {{ $leave->start_date->format('d M Y') }} – {{ $leave->end_date->format('d M Y') }}
+                            {{ $leave->start_date->asDate() }} – {{ $leave->end_date->asDate() }}
                         </dd>
                         <dt class="text-gray-500">Days</dt>
                         <dd class="font-medium text-gray-900">{{ rtrim(rtrim(number_format($leave->dayCount(), 1), '0'), '.') }} {{ $leave->dayCount() == 1 ? 'day' : 'days' }}</dd>

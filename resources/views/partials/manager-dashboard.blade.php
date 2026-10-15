@@ -130,7 +130,7 @@
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </span>
                 <h3 class="font-semibold text-gray-800">Team Attendance</h3>
-                <span class="ml-auto text-xs text-gray-400">{{ now()->format('d M Y') }}</span>
+                <span class="ml-auto text-xs text-gray-400">{{ now()->asDate() }}</span>
             </div>
 
             @php($total = max(1, $dash['teamSize']))
@@ -322,7 +322,7 @@
                             <div class="text-xs text-gray-500 truncate">{{ $item['subtitle'] }}</div>
                         </div>
                         <div class="shrink-0 text-right">
-                            <div class="text-xs text-gray-400 whitespace-nowrap">{{ $item['date']->format('d/m/Y') }}</div>
+                            <div class="text-xs text-gray-400 whitespace-nowrap">{{ $item['date']->asDate() }}</div>
                             @if ($item['link'])
                                 <a href="{{ $item['link'] }}" target="_blank" rel="noopener"
                                    class="text-xs font-semibold hover:underline" style="color:#2f80ed;">Join</a>
@@ -368,7 +368,7 @@
                                style="background-color:#2f80ed;">Send Wish</a>
                         @else
                             <span class="shrink-0 text-xs text-gray-400 whitespace-nowrap">
-                                {{ $b['daysUntil'] === 1 ? 'Tomorrow' : $b['date']->format('d/m/Y') }}
+                                {{ $b['daysUntil'] === 1 ? 'Tomorrow' : $b['date']->asDate() }}
                             </span>
                         @endif
                     </div>

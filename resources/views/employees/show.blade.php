@@ -47,11 +47,11 @@
                     </div>
                     <div>
                         <dt class="text-gray-500">Hire Date</dt>
-                        <dd class="font-medium text-gray-900">{{ $employee->hire_date?->format('d M Y') ?? '—' }}</dd>
+                        <dd class="font-medium text-gray-900">{{ $employee->hire_date?->asDate() ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500">Date of Birth</dt>
-                        <dd class="font-medium text-gray-900">{{ $employee->date_of_birth?->format('d M Y') ?? '—' }}</dd>
+                        <dd class="font-medium text-gray-900">{{ $employee->date_of_birth?->asDate() ?? '—' }}</dd>
                     </div>
                     <div>
                         <dt class="text-gray-500">Status</dt>

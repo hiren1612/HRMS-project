@@ -45,8 +45,8 @@
             @include('attendance._clock-panel')
 
             {{-- History --}}
-            <div class="bg-white shadow-sm sm:rounded-lg overflow-y-hidden whitespace-nowrap overflow-x-auto w-100">
-                <table class="min-w-full divide-y divide-gray-200">
+            <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
+                <table class="rt min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <th class="px-6 py-3">Date</th>
@@ -60,12 +60,12 @@
                     <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                         @forelse ($attendances as $record)
                             <tr>
-                                <td class="px-6 py-4">{{ $record->date->format('d M Y') }}</td>
-                                <td class="px-6 py-4">{{ $record->clock_in->format('h:i A') }}</td>
-                                <td class="px-6 py-4">{{ $record->clock_out?->format('h:i A') ?? '—' }}</td>
-                                <td class="px-6 py-4">{{ $record->isOpen() ? '—' : $record->workedLabel() }}</td>
-                                <td class="px-6 py-4">{{ $record->break_minutes }} min</td>
-                                <td class="px-6 py-4">
+                                <td data-label="Date" class="px-6 py-4">{{ $record->date->asDate() }}</td>
+                                <td data-label="Start Time" class="px-6 py-4">{{ $record->clock_in->asTime() }}</td>
+                                <td data-label="End Time" class="px-6 py-4">{{ $record->clock_out?->asTime() ?? '—' }}</td>
+                                <td data-label="Worked" class="px-6 py-4">{{ $record->isOpen() ? '—' : $record->workedLabel() }}</td>
+                                <td data-label="Break" class="px-6 py-4">{{ $record->break_minutes }} min</td>
+                                <td data-label="Productive" class="px-6 py-4">
                                     @if ($record->isOpen())
                                         <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">In progress</span>
                                     @else

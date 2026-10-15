@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
@@ -65,6 +66,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/attendance/clock-out', [AttendanceController::class, 'clockOut'])->name('attendance.clockOut');
     Route::patch('/attendance/break', [AttendanceController::class, 'break'])->name('attendance.break');
 
+    // QA U10: time a break instead of typing the minutes in afterwards.
+    Route::post('/attendance/break/start', [AttendanceController::class, 'startBreak'])->name('attendance.break.start');
+    Route::post('/attendance/break/end', [AttendanceController::class, 'endBreak'])->name('attendance.break.end');
+
     // QA M7 / H1: organisation-wide export and HR correction of a session.
     Route::get('/attendance/export', [AttendanceController::class, 'export'])->name('attendance.export');
     Route::patch('/attendance/{attendance}/correct', [AttendanceController::class, 'correct'])->name('attendance.correct');
@@ -98,6 +103,10 @@ Route::middleware(['auth', 'role:admin,hr'])->group(function () {
 
     // Employee management — full CRUD (index/create/store/show/edit/update/destroy).
     Route::resource('employees', EmployeeController::class);
+
+    // QA L2: announcements appear on every dashboard, so HR needs a screen to
+    // post, edit, unpublish and remove them.
+    Route::resource('announcements', AnnouncementController::class)->except(['show']);
 
     // Bootstrap HRMS dashboard with summary statistics.
     Route::get('/hrms-dashboard', [DashboardController::class, 'index'])->name('hrms.dashboard');

@@ -69,6 +69,61 @@ class AttendanceController extends Controller
     /**
      * Record/update the break time (in minutes) for today's session.
      */
+    /**
+     * QA U10: start the break clock.
+     *
+     * Breaks used to be typed in as a number of minutes after the event, so
+     * they were guesswork and nothing on screen showed somebody was away.
+     */
+    public function startBreak(Request $request): RedirectResponse
+    {
+        $session = $this->openSessionFor($request);
+
+        if (! $session) {
+            return back()->with('error', 'Start your day before taking a break.');
+        }
+
+        if ($session->isOnBreak()) {
+            return back()->with('error', 'You are already on a break.');
+        }
+
+        $session->update(['break_started_at' => now()]);
+
+        return back()->with('success', 'Break started at ' . now()->asTime() . '.');
+    }
+
+    /**
+     * QA U10: stop the break clock and add the elapsed time to the total.
+     */
+    public function endBreak(Request $request): RedirectResponse
+    {
+        $session = $this->openSessionFor($request);
+
+        if (! $session?->isOnBreak()) {
+            return back()->with('error', 'You are not on a break.');
+        }
+
+        $taken = $session->currentBreakMinutes();
+
+        $session->update([
+            'break_minutes' => $session->break_minutes + $taken,
+            'break_started_at' => null,
+        ]);
+
+        return back()->with('success', $taken . ' minute break recorded. Total today: ' . $session->break_minutes . ' min.');
+    }
+
+    /**
+     * The signed-in user's session that is still running, if any.
+     */
+    private function openSessionFor(Request $request): ?Attendance
+    {
+        return $request->user()->employee?->attendances()
+            ->whereNull('clock_out')
+            ->latest('clock_in')
+            ->first();
+    }
+
     public function break(Request $request): RedirectResponse
     {
         $validated = $request->validate([
@@ -124,7 +179,7 @@ class AttendanceController extends Controller
             'clock_in' => now(),
         ]);
 
-        return back()->with('success', 'Clocked in at ' . now()->format('h:i A') . '.');
+        return back()->with('success', 'Clocked in at ' . now()->asTime() . '.');
     }
 
     /**
@@ -143,9 +198,16 @@ class AttendanceController extends Controller
             return back()->with('error', 'You are not clocked in.');
         }
 
-        $openSession->update(['clock_out' => now()]);
+        // QA U10: if a break is still running, close it first so the time
+        // away is counted rather than silently becoming productive time.
+        $openSession->update([
+            'clock_out' => now(),
+            'break_minutes' => $openSession->breakMinutesSoFar(),
+            'break_started_at' => null,
+            'closed_by' => Attendance::CLOSED_MANUAL,
+        ]);
 
-        return back()->with('success', 'Clocked out at ' . now()->format('h:i A') . '. Worked ' . $openSession->workedLabel() . '.');
+        return back()->with('success', 'Clocked out at ' . now()->asTime() . '. Worked ' . $openSession->workedLabel() . '.');
     }
 
     /**

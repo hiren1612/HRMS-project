@@ -12,8 +12,8 @@
                 <div class="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-800">{{ session('success') }}</div>
             @endif
 
-            <div class="bg-white shadow-sm sm:rounded-lg overflow-y-hidden whitespace-nowrap overflow-x-auto w-100">
-                <table class="min-w-full divide-y divide-gray-200">
+            <div class="bg-white shadow-sm sm:rounded-lg overflow-x-auto">
+                <table class="rt min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             <th class="px-6 py-3">Employee</th>
@@ -27,21 +27,20 @@
                     <tbody class="divide-y divide-gray-200 text-sm text-gray-700">
                         @forelse ($pendingLeaves as $leave)
                             <tr>
-                                <td class="px-6 py-4">{{ $leave->employee->displayName() }}</td>
-                                <td class="px-6 py-4">{{ $leave->typeLabel() }}</td>
-                                <td class="px-6 py-4">{{ $leave->sessionLabel() }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    {{ $leave->start_date->format('d M') }} – {{ $leave->end_date->format('d M Y') }}
+                                <td data-label="Employee" class="px-6 py-4">{{ $leave->employee->displayName() }}</td>
+                                <td data-label="Type" class="px-6 py-4">{{ $leave->typeLabel() }}</td>
+                                <td data-label="Session" class="px-6 py-4">{{ $leave->sessionLabel() }}</td>
+                                <td data-label="Dates" class="px-6 py-4 whitespace-nowrap">
+                                    {{ $leave->start_date->asShortDate() }} – {{ $leave->end_date->asDate() }}
                                 </td>
-                                <td class="px-6 py-4 max-w-xs truncate" title="{{ $leave->reason }}">{{ $leave->reason ?? '—' }}</td>
-                                <td class="px-6 py-4 text-right whitespace-nowrap">
+                                <td data-label="Reason" class="px-6 py-4 max-w-xs truncate" title="{{ $leave->reason }}">{{ $leave->reason ?? '—' }}</td>
+                                <td data-label="Decision" class="px-6 py-4 text-right whitespace-nowrap">
                                     @can('approve', $leave)
                                         <div class="inline-flex items-center gap-2">
-                                            <form method="POST" action="{{ route('leaves.approve', $leave) }}"
-                                                  onsubmit="return confirm('Approve this leave?');">
-                                                @csrf @method('PATCH')
-                                                <button class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-500">Approve</button>
-                                            </form>
+                                            <x-confirm-action :action="route('leaves.approve', $leave)" method="PATCH"
+                                                              label="Approve" confirm="Approve leave" tone="primary"
+                                                              title="Approve this leave request?"
+                                                              :message="$leave->employee->displayName() . ' will be approved for ' . $leave->dayCount() . ' day(s), and the days deducted from their balance.'" />
                                             {{-- QA M3: a rejection carries a reason the employee can read. --}}
                                             <div x-data="{ open: false }" class="inline-block">
                                                 <button type="button" x-on:click="open = !open"
