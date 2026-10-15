@@ -1,3 +1,5 @@
+@section('title', 'Admin')
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Admin — User & Role Management') }}</h2>
@@ -37,6 +39,8 @@
             <div class="bg-white shadow-sm sm:rounded-lg overflow-y-hidden whitespace-nowrap overflow-x-auto w-100">
                 <div class="px-6 py-4 border-b flex items-center justify-between gap-3">
                     <h3 class="font-semibold text-gray-800">All Users</h3>
+                    {{-- QA M14: only offer the sync once a token is configured. --}}
+                    @if (config('services.timecamp.token'))
                     <form method="POST" action="{{ route('admin.timecamp.sync') }}"
                           onsubmit="return confirm('Import / refresh users from TimeCamp now?');">
                         @csrf
@@ -47,6 +51,9 @@
                             Sync from TimeCamp
                         </button>
                     </form>
+                    @else
+                        <p class="text-sm text-gray-500">TimeCamp sync is unavailable &mdash; set <code>TIMECAMP_API_TOKEN</code> in the server <code>.env</code> to enable it.</p>
+                    @endif
                 </div>
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">

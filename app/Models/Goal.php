@@ -77,8 +77,11 @@ class Goal extends Model
     /**
      * A goal at 100% is finished, whatever the form said (QA M13); dropping
      * back below 100% reopens it.
+     *
+     * This must be booted(), not boot<Something>() — Laravel only auto-calls
+     * boot{TraitName} for traits in use, so the earlier name never ran.
      */
-    protected static function bootGoalCompletion(): void
+    protected static function booted(): void
     {
         static::saving(function (self $goal) {
             if ($goal->progress >= 100 && $goal->status === self::STATUS_ACTIVE) {

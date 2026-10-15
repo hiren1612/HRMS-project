@@ -16,12 +16,14 @@ class Leave extends Model
     public const STATUS_PENDING = 'pending';
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
+    public const STATUS_CANCELLED = 'cancelled';
 
     /** @var list<string> */
     public const STATUSES = [
         self::STATUS_PENDING,
         self::STATUS_APPROVED,
         self::STATUS_REJECTED,
+        self::STATUS_CANCELLED,
     ];
 
     /** Selectable leave types (value => label). */
@@ -108,6 +110,7 @@ class Leave extends Model
         'start_date',
         'end_date',
         'reason',
+        'decision_note',
         'status',
     ];
 

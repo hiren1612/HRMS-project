@@ -5,7 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+        {{-- QA U5: a distinct tab title per page, e.g. "Employees - HRMS". --}}
+        <title>{{ trim($__env->yieldContent('title')) ? $__env->yieldContent('title') . ' · ' : '' }}{{ config('app.name', 'HRMS') }}</title>
 
         <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
         <link rel="apple-touch-icon" href="{{ asset('images/favicon.png') }}">

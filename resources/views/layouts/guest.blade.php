@@ -38,7 +38,7 @@
                 {{-- Headline --}}
                 <div class="relative">
                     <h1 class="text-4xl font-bold leading-tight">Manage your workforce, effortlessly.</h1>
-                    <p class="mt-4 text-blue-100 text-lg">Attendance, leaves, payroll and employee records — all in one secure place.</p>
+                    <p class="mt-4 text-blue-100 text-lg">Attendance, leaves, goals and employee records — all in one secure place.</p>
 
                     <ul class="mt-8 space-y-3 text-blue-50">
                         <li class="flex items-center gap-3">

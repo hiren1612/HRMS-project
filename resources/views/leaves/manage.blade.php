@@ -1,3 +1,5 @@
+@section('title', 'Leave Requests')
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Pending Leave Requests') }}</h2>
@@ -40,11 +42,19 @@
                                                 @csrf @method('PATCH')
                                                 <button class="px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-500">Approve</button>
                                             </form>
-                                            <form method="POST" action="{{ route('leaves.reject', $leave) }}"
-                                                  onsubmit="return confirm('Reject this leave?');">
-                                                @csrf @method('PATCH')
-                                                <button class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-500">Reject</button>
-                                            </form>
+                                            {{-- QA M3: a rejection carries a reason the employee can read. --}}
+                                            <div x-data="{ open: false }" class="inline-block">
+                                                <button type="button" x-on:click="open = !open"
+                                                        class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-500">Reject</button>
+                                                <form method="POST" action="{{ route('leaves.reject', $leave) }}"
+                                                      x-show="open" x-cloak class="mt-2 flex items-start gap-2">
+                                                    @csrf @method('PATCH')
+                                                    <input type="text" name="decision_note" required maxlength="500"
+                                                           placeholder="Reason for rejecting"
+                                                           class="w-56 text-xs border-gray-300 rounded-md shadow-sm">
+                                                    <button class="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-500">Confirm</button>
+                                                </form>
+                                            </div>
                                         </div>
                                     @else
                                         <span class="text-xs text-gray-400 italic">Your own request</span>

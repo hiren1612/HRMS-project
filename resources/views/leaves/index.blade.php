@@ -1,3 +1,5 @@
+@section('title', 'My Leaves')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
@@ -59,6 +61,14 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <a href="{{ route('leaves.show', $leave) }}" class="text-indigo-600 hover:underline">View</a>
+                                    @if ($leave->isPending())
+                                        {{-- QA M4: withdraw a request that has not been decided. --}}
+                                        <form method="POST" action="{{ route('leaves.cancel', $leave) }}" class="inline ml-3"
+                                              onsubmit="return confirm('Cancel this leave request?');">
+                                            @csrf @method('PATCH')
+                                            <button class="text-red-600 hover:underline">Cancel</button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

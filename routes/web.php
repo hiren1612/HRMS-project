@@ -47,6 +47,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/leaves/create', [LeaveController::class, 'create'])->name('leaves.create');
     Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
     Route::get('/leaves/{leave}', [LeaveController::class, 'show'])->name('leaves.show');
+    // QA M4: the applicant may withdraw their own pending request.
+    Route::patch('/leaves/{leave}/cancel', [LeaveApprovalController::class, 'cancel'])->name('leaves.cancel');
 
     // In-app notifications (database channel).
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');

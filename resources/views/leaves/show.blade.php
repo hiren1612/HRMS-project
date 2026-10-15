@@ -34,6 +34,10 @@
                     <div class="sm:col-span-2">
                         <dt class="text-gray-500">Reason</dt>
                         <dd class="font-medium text-gray-900 whitespace-pre-line">{{ $leave->reason ?? '—' }}</dd>
+                        @if ($leave->decision_note)
+                            <dt class="text-gray-500">Decision note</dt>
+                            <dd class="font-medium text-gray-900">{{ $leave->decision_note }}</dd>
+                        @endif
                     </div>
                 </dl>
 

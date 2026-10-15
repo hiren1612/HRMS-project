@@ -40,7 +40,9 @@ class StoreLeaveRequest extends FormRequest
         return [
             'leave_type' => ['required', Rule::in(array_keys(Leave::TYPES))],
             'session' => ['required', Rule::in(array_keys(Leave::SESSIONS))],
-            'start_date' => ['required', 'date', 'after_or_equal:today'],
+            // QA M5: sick leave is often recorded after the day. Back-dating is
+            // allowed within a month; it still needs approval either way.
+            'start_date' => ['required', 'date', 'after_or_equal:' . now()->subMonth()->toDateString()],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'reason' => ['required', 'string', 'max:500'],
         ];
@@ -52,7 +54,7 @@ class StoreLeaveRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'start_date.after_or_equal' => 'The leave start date cannot be in the past.',
+            'start_date.after_or_equal' => 'Leave can be back-dated by up to one month.',
             'end_date.after_or_equal' => 'The end date must be the same as or after the start date.',
         ];
     }

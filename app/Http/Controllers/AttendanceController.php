@@ -16,15 +16,6 @@ class AttendanceController extends Controller
      */
     public function index(Request $request): View
     {
-        // HR needs the organisation-wide view too, not just their own (QA H7).
-        if ($request->user()->hasAnyRole([\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_HR])) {
-            $attendances = Attendance::with('employee.user')
-                ->latest('clock_in')
-                ->paginate(20);
-
-            return view('attendance.admin', compact('attendances'));
-        }
-
         $employee = $request->user()->employee;
 
         // The currently-open session (clocked in, not yet out), if any.
@@ -41,6 +32,17 @@ class AttendanceController extends Controller
         $todayMinutes = $this->productiveMinutes($employee, today(), today());
         $weekMinutes = $this->productiveMinutes($employee, now()->startOfWeek(), now()->endOfWeek());
         $monthMinutes = $this->productiveMinutes($employee, now()->startOfMonth(), now()->endOfMonth());
+
+        // Admin and HR additionally see the organisation-wide list, but keep
+        // their own clock-in panel - removing it left HR unable to record a
+        // day at all (QA N1, and the Admin half of M7).
+        if ($request->user()->hasAnyRole([\App\Models\User::ROLE_ADMIN, \App\Models\User::ROLE_HR])) {
+            return view('attendance.admin', [
+                'attendances' => Attendance::with('employee.user')->latest('clock_in')->paginate(20),
+                'employee' => $employee,
+                'openSession' => $openSession,
+            ]);
+        }
 
         return view('attendance.index', compact(
             'employee', 'openSession', 'attendances', 'todayMinutes', 'weekMinutes', 'monthMinutes'
