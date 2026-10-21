@@ -1,0 +1,24 @@
+{
+  "name": "hrms-tracking-agent",
+  "productName": "HRMS Tracking Agent",
+  "version": "1.0.0",
+  "description": "Employee time tracking agent for the HRMS. Transparent by design: visible indicators, no hidden monitoring, no keystroke capture.",
+  "main": "src/main/main.js",
+  "private": true,
+  "author": "Hike Branding",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "dev": "cross-env AGENT_DEV=1 electron .",
+    "test": "node --test test/*.test.js",
+    "mock-server": "node tools/mock-server.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "cross-env": "7.0.3",
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "dependencies": {}
+}

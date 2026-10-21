@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
+    <title>HRMS Tracking</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+    <div class="who">
+        <div class="avatar" id="avatar">?</div>
+        <div>
+            <h1 id="name">Not signed in</h1>
+            <p class="sub" id="role">—</p>
+        </div>
+    </div>
+
+    <div id="blocked" class="notice" hidden></div>
+    <div id="offline" class="error" hidden>
+        Cannot reach the HRMS right now. Tracking continues, and everything
+        recorded will be sent as soon as the connection returns.
+    </div>
+
+    <div class="card">
+        <span class="status offline" id="status">
+            <span class="dot" id="dot"></span>
+            <span id="statusText">Not tracking</span>
+        </span>
+
+        <div class="times">
+            <div>
+                <div class="time-label">Active today</div>
+                <div class="time-value" id="active">0h 00m</div>
+            </div>
+            <div>
+                <div class="time-label">Idle today</div>
+                <div class="time-value idle" id="idle">0h 00m</div>
+            </div>
+        </div>
+
+        <div class="times" style="grid-template-columns:1fr">
+            <div>
+                <div class="time-label">This session</div>
+                <div class="time-value" id="tracked" style="font-size:18px">0h 00m</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="row">
+            <span class="k">Screenshots</span>
+            <span class="v off" id="shots">Off</span>
+        </div>
+        <div class="row">
+            <span class="k">Live screen</span>
+            <span class="v off" id="live">Not active</span>
+        </div>
+        <div class="row">
+            <span class="k">Waiting to upload</span>
+            <span class="v" id="queued">0 items</span>
+        </div>
+        <div class="row">
+            <span class="k">Start with Windows</span>
+            <span class="v" id="autostart">Yes</span>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-ghost" id="pause" disabled>Pause</button>
+        <button class="btn-primary" id="open">Open HRMS</button>
+    </div>
+
+    <div class="actions" style="margin-top:8px">
+        <button class="btn-ghost" id="sync">Sync now</button>
+        <button class="btn-ghost" id="signout">Sign out</button>
+    </div>
+
+    <p class="foot">
+        This agent records active and idle time. It never records what you
+        type.<br>Whenever screenshots or live viewing are active, a marker
+        stays visible on your screen.
+    </p>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

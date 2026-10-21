@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
+    <title>Monitoring active</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="indicator">
+<!--
+    The visible proof that monitoring is on.
+
+    Always on top, on every workspace, and with no close button. The brief
+    requires employees to be able to see when screenshots or live viewing
+    are active; an indicator that can be dismissed would not do that.
+-->
+<div id="badge" class="badge">
+    <svg class="eye" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+    </svg>
+    <div class="text">
+        <div class="title" id="title">Screenshots are on</div>
+        <div class="by" id="by">Working hours only</div>
+    </div>
+</div>
+<script src="indicator.js"></script>
+</body>
+</html>

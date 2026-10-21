@@ -16,6 +16,14 @@ use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ScheduleController;
+use App\Http\Controllers\Monitoring\DeviceController;
+use App\Http\Controllers\Monitoring\LiveViewController;
+use App\Http\Controllers\Monitoring\ScreenshotController as MonitoringScreenshotController;
+use App\Http\Controllers\Monitoring\MonitoringDashboardController;
+use App\Http\Controllers\Monitoring\PermissionController;
+use App\Http\Controllers\Monitoring\SettingsController;
+use App\Http\Controllers\Monitoring\TrackingController;
+use App\Http\Middleware\EnsureMonitoringAccess;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -123,6 +131,70 @@ Route::middleware(['auth', 'role:admin,hr'])->group(function () {
     // Employee performance goals — HR/admin assign them; employees see
     // their own on the dashboard.
     Route::resource('goals', GoalController::class)->except(['show']);
+});
+
+/*
+|--------------------------------------------------------------------------
+| Productivity monitoring
+|--------------------------------------------------------------------------
+|
+| Gated by EnsureMonitoringAccess rather than by role. Being an administrator
+| of the HRMS is not the same as being cleared to see what a colleague had on
+| screen, so access comes from a row in employee_monitoring_permissions and
+| nobody has it by default.
+|
+| These three screens are read-only. Screenshots, live viewing and the
+| settings form are separate capabilities and arrive with their own screens.
+|
+*/
+Route::middleware(['auth', EnsureMonitoringAccess::class])->prefix('monitoring')->name('monitoring.')->group(function () {
+    Route::get('/', [MonitoringDashboardController::class, 'index'])->name('overview');
+    Route::get('/tracking', [TrackingController::class, 'index'])->name('index');
+    Route::get('/tracking/{employee}', [TrackingController::class, 'show'])->name('show');
+
+    // Changing what the module records is a separate clearance from reading
+    // what it recorded.
+    Route::middleware(EnsureMonitoringAccess::class . ':settings')->group(function () {
+        Route::get('/settings', [SettingsController::class, 'edit'])->name('settings');
+        Route::patch('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    });
+
+    // Looking at a photograph of somebody's screen is its own clearance.
+    Route::middleware(EnsureMonitoringAccess::class . ':screenshots')->group(function () {
+        Route::get('/screenshots', [MonitoringScreenshotController::class, 'index'])->name('screenshots');
+        // The only route that serves the image bytes. They sit on a private
+        // disk with no public URL precisely so this check cannot be skipped.
+        Route::get('/screenshots/{screenshot}', [MonitoringScreenshotController::class, 'show'])->name('screenshots.show');
+        Route::delete('/screenshots/{screenshot}', [MonitoringScreenshotController::class, 'destroy'])->name('screenshots.destroy');
+    });
+
+    // Watching somebody in real time is the most intrusive thing the module
+    // can do, and has its own capability again.
+    Route::middleware(EnsureMonitoringAccess::class . ':live')->group(function () {
+        Route::get('/live', [LiveViewController::class, 'index'])->name('live');
+        Route::post('/live', [LiveViewController::class, 'store'])->name('live.store');
+        Route::get('/live/{session}/frame', [LiveViewController::class, 'frame'])->name('live.frame');
+        Route::delete('/live/{session}', [LiveViewController::class, 'destroy'])->name('live.destroy');
+    });
+
+    // Approving a device is what lets an agent start reporting at all.
+    Route::middleware(EnsureMonitoringAccess::class . ':devices')->group(function () {
+        Route::get('/devices', [DeviceController::class, 'index'])->name('devices');
+        Route::patch('/devices/{device}/approve', [DeviceController::class, 'approve'])->name('devices.approve');
+        Route::patch('/devices/{device}/revoke', [DeviceController::class, 'revoke'])->name('devices.revoke');
+    });
+});
+
+/*
+| Deciding who may watch is not itself a monitoring capability. It is gated
+| on the administrator role instead, so somebody cleared to review
+| screenshots cannot use that clearance to clear anyone else.
+*/
+Route::middleware(['auth', 'role:admin'])->prefix('monitoring')->name('monitoring.')->group(function () {
+    Route::get('/permissions', [PermissionController::class, 'index'])->name('permissions');
+    Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
+    Route::patch('/permissions/{permission}', [PermissionController::class, 'update'])->name('permissions.update');
+    Route::delete('/permissions/{permission}', [PermissionController::class, 'destroy'])->name('permissions.destroy');
 });
 
 require __DIR__.'/auth.php';

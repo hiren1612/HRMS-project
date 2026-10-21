@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:;">
+    <title>Sign in — HRMS Tracking</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+    <h1>HRMS Tracking</h1>
+    <p class="sub">Sign in with your usual HRMS account.</p>
+
+    <div class="notice">
+        This agent records how long you are active at this PC and may take
+        periodic screenshots during working hours. Whenever it does, a marker
+        stays visible on your screen. It never records what you type.
+    </div>
+
+    <div id="error" class="error" hidden></div>
+
+    <form id="form">
+        <label for="server">HRMS address</label>
+        <input id="server" type="url" placeholder="https://hrms.example.com" required>
+
+        <label for="email">Email</label>
+        <input id="email" type="email" autocomplete="username" required>
+
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" required>
+
+        <button id="submit" class="btn-primary" type="submit" style="width:100%">Sign in</button>
+    </form>
+
+    <p class="foot">
+        Your password is used once to sign in and is never stored on this PC.<br>
+        This device must be approved by an administrator before tracking starts.
+    </p>
+</div>
+<script src="login.js"></script>
+</body>
+</html>

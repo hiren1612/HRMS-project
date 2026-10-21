@@ -1,0 +1,59 @@
+#
+# Windows installer.
+#
+# NSIS, per-machine, with the uninstaller left intact so IT can remove the
+# agent the ordinary way through Apps & Features. Nothing here installs a
+# service or a driver: the agent runs as the signed-in user and only for
+# the user who installed it.
+#
+appId: com.hikebranding.hrms.agent
+productName: HRMS Tracking Agent
+copyright: Copyright © 2026 Hike Branding
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - src/**/*
+  - package.json
+  - '!test/**/*'
+  - '!tools/**/*'
+  - '!**/*.map'
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  artifactName: HRMS-Tracking-Agent-Setup-${version}.${ext}
+
+  # Code signing. Without this Windows SmartScreen warns every employee on
+  # first run and many will not get past it, so treat the certificate as
+  # part of the deliverable rather than an optional extra.
+  #
+  # Supply these as environment variables at build time, never in this file:
+  #   CSC_LINK          path or base64 of the .pfx
+  #   CSC_KEY_PASSWORD  its password
+  signAndEditExecutable: true
+  signtoolOptions:
+    publisherName: Hike Branding
+    signingHashAlgorithms: [sha256]
+    rfc3161TimeStampServer: http://timestamp.digicert.com
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
+  createDesktopShortcut: false
+  createStartMenuShortcut: true
+  shortcutName: HRMS Tracking
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  include: build/installer.nsh
+
+# Auto-update is intentionally not configured. An agent that can silently
+# replace its own binary on employee machines is a larger decision than a
+# build setting, and should be turned on deliberately once there is a
+# signing certificate and somewhere to host the feed.
+publish: null

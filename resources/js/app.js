@@ -79,4 +79,77 @@ Alpine.data('hrmsCalendar', (events, todayIso) => {
 });
 
 
+// Live screen viewer. Polls the server for the newest frame the agent has
+// pushed; it cannot pull anything from the employee's machine itself, so an
+// agent that is offline or has not shown the indicator simply yields no
+// frames and the page says so.
+Alpine.data('liveView', (frameUrl) => ({
+    frame: null,
+    status: 'requested',
+    notified: false,
+    open: true,
+    streaming: false,
+    timer: null,
+
+    start() {
+        this.poll();
+        // Roughly 2 fps: fast enough to follow what somebody is doing, slow
+        // enough not to hammer the server.
+        this.timer = setInterval(() => this.poll(), 500);
+
+        // A forgotten background tab should not keep somebody's screen on
+        // the wire.
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                clearInterval(this.timer);
+                this.timer = null;
+            } else if (!this.timer && this.open) {
+                this.timer = setInterval(() => this.poll(), 500);
+            }
+        });
+    },
+
+    async poll() {
+        try {
+            const response = await fetch(frameUrl, { headers: { Accept: 'application/json' } });
+
+            if (!response.ok) return;
+
+            const data = await response.json();
+
+            this.status = data.status;
+            this.notified = data.notified;
+            this.open = data.open;
+            this.frame = data.frame;
+            this.streaming = data.open && data.frame !== null;
+
+            if (!data.open) {
+                clearInterval(this.timer);
+                this.timer = null;
+                this.frame = null;
+            }
+        } catch (e) {
+            // A dropped poll is not worth surfacing; the next one in half a
+            // second will either work or not.
+        }
+    },
+
+    statusLabel() {
+        if (!this.open) return 'Session ended';
+        if (this.streaming) return 'Live';
+        if (this.notified) return 'Indicator shown, waiting for the first frame';
+
+        return 'Waiting for the agent to show the indicator';
+    },
+
+    waitingMessage() {
+        if (!this.open) return 'This session has ended.';
+        if (this.notified) return 'The employee has been notified. Waiting for the first frame…';
+
+        return 'Waiting for the agent to confirm the on-screen indicator. '
+             + 'If their machine is asleep or offline, nothing will arrive.';
+    },
+}));
+
+
 Alpine.start();

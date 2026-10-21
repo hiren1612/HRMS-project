@@ -27,6 +27,12 @@ export default defineConfig({
                 '**/vendor/**',
                 '**/bootstrap/cache/**',
                 '**/public/build/**',
+                // The desktop tracking agent is a separate Electron project
+                // with its own package.json and its own node_modules. None of
+                // it is part of the web build, and leaving the watcher to
+                // crawl it slows startup and risks the EBUSY crash this
+                // ignore list exists to prevent.
+                '**/desktop-agent/**',
             ],
         },
     },

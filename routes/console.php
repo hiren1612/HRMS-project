@@ -12,3 +12,8 @@ Artisan::command('inspire', function () {
 // Requires a cron entry on the server:
 //   * * * * * cd /path/to/app && php artisan schedule:run >> /dev/null 2>&1
 Schedule::command('attendance:close-stale')->dailyAt('00:15');
+
+// Monitoring retention. Without this the retention setting is a promise
+// nobody keeps: the number sits in the settings form while the images stay
+// on disk forever. Same cron entry as above drives it.
+Schedule::command('monitoring:prune')->dailyAt('03:30')->withoutOverlapping();

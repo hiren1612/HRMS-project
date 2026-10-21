@@ -1,0 +1,281 @@
+/*
+ * Agent UI.
+ *
+ * Deliberately matches the HRMS palette (#2f80ed brand blue, #0b2545 ink,
+ * Figtree-ish system stack) so the agent reads as part of the same product,
+ * without importing anything from the web application or depending on it.
+ */
+
+:root {
+    --brand: #2f80ed;
+    --ink: #0b2545;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --bg: #f8fafc;
+    --green: #16a34a;
+    --amber: #d97706;
+    --red: #dc2626;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Figtree, system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+h1 {
+    margin: 0 0 4px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.sub {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.wrap {
+    padding: 20px;
+}
+
+.card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.who {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--brand);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 17px;
+}
+
+/* ---------------------------------------------------------------- status */
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status.active { background: #dcfce7; color: var(--green); }
+.status.idle { background: #fef3c7; color: var(--amber); }
+.status.paused { background: #e2e8f0; color: var(--muted); }
+.status.offline { background: #f1f5f9; color: var(--muted); }
+
+.pulse {
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+}
+
+/* ----------------------------------------------------------------- times */
+
+.times {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 14px;
+}
+
+.time-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+}
+
+.time-value {
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+}
+
+.time-value.idle { color: var(--amber); }
+
+/* ------------------------------------------------------------ monitoring */
+
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.row:last-child { border-bottom: 0; }
+
+.row .k { color: var(--muted); font-size: 13px; }
+.row .v { font-weight: 600; font-size: 13px; }
+.v.on { color: var(--green); }
+.v.off { color: var(--muted); }
+.v.warn { color: var(--red); }
+
+/* --------------------------------------------------------------- buttons */
+
+button {
+    font: inherit;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    padding: 9px 14px;
+    cursor: pointer;
+}
+
+button:disabled { opacity: 0.5; cursor: default; }
+
+.btn-primary { background: var(--brand); color: #fff; }
+.btn-primary:hover:not(:disabled) { filter: brightness(1.07); }
+
+.btn-ghost { background: #fff; border-color: var(--line); color: var(--ink); }
+.btn-ghost:hover:not(:disabled) { background: var(--bg); }
+
+.actions { display: flex; gap: 8px; }
+.actions button { flex: 1; }
+
+/* ----------------------------------------------------------------- forms */
+
+label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='url'] {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font: inherit;
+    margin-bottom: 13px;
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+input:focus {
+    outline: 2px solid var(--brand);
+    outline-offset: -1px;
+    border-color: var(--brand);
+}
+
+.error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 13px;
+    margin-bottom: 13px;
+}
+
+.notice {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    margin-bottom: 13px;
+}
+
+.foot {
+    text-align: center;
+    color: var(--muted);
+    font-size: 11.5px;
+    line-height: 1.6;
+    margin-top: 16px;
+}
+
+/* ------------------------------------------------------------- indicator */
+
+body.indicator {
+    background: transparent;
+    overflow: hidden;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 46px;
+    margin: 4px;
+    padding: 0 14px;
+    border-radius: 10px;
+    background: rgba(11, 37, 69, 0.94);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+
+.badge.live {
+    background: rgba(185, 28, 28, 0.96);
+}
+
+.badge .eye { flex: none; }
+
+.badge .text {
+    min-width: 0;
+    line-height: 1.25;
+}
+
+.badge .title {
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.badge .by {
+    font-size: 11px;
+    opacity: 0.85;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

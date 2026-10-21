@@ -8,12 +8,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    // HasApiTokens is for the desktop tracking agent only. Nothing in the
+    // web application issues or reads these tokens; the browser keeps using
+    // the ordinary session guard exactly as before.
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * Available roles in the HRMS. Using constants keeps role names in one

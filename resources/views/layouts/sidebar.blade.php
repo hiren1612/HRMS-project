@@ -102,6 +102,74 @@
             </div>
         @endif
 
+        {{-- MONITORING --}}
+        @php($monitoringPermission = \App\Models\Monitoring\MonitoringPermission::where('user_id', $u->id)->first())
+
+        @if ($monitoringPermission)
+            <div>
+                <p class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Monitoring</p>
+
+                {{-- Deliberately outside the role-gated block above. Clearance
+                     to see monitoring data comes from a permission row, not
+                     from a job title, so the link follows the same rule the
+                     middleware does rather than a role that only approximates
+                     it. --}}
+                <x-sidebar-link :href="route('monitoring.overview')" :active="request()->routeIs('monitoring.overview')">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    Productivity
+                </x-sidebar-link>
+
+                <x-sidebar-link :href="route('monitoring.index')" :active="request()->routeIs('monitoring.index') || request()->routeIs('monitoring.show')">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Tracking
+                </x-sidebar-link>
+
+                {{-- Each of these is a separate capability on the permission
+                     row, so the links appear one by one rather than as a
+                     block: somebody cleared to approve devices is not
+                     thereby cleared to change what gets recorded. --}}
+
+                @if ($monitoringPermission?->can_view_screenshots)
+                    <x-sidebar-link :href="route('monitoring.screenshots')" :active="request()->routeIs('monitoring.screenshots*')">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Screenshots
+                    </x-sidebar-link>
+                @endif
+
+                @if ($monitoringPermission?->can_view_live_screen)
+                    <x-sidebar-link :href="route('monitoring.live')" :active="request()->routeIs('monitoring.live*')">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        Live Screen
+                    </x-sidebar-link>
+                @endif
+
+                @if ($monitoringPermission?->can_manage_devices)
+                    <x-sidebar-link :href="route('monitoring.devices')" :active="request()->routeIs('monitoring.devices*')">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Devices
+                    </x-sidebar-link>
+                @endif
+
+                @if ($monitoringPermission?->can_manage_settings)
+                    <x-sidebar-link :href="route('monitoring.settings')" :active="request()->routeIs('monitoring.settings*')">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Monitoring Settings
+                    </x-sidebar-link>
+                @endif
+            </div>
+        @endif
+
+        {{-- Granting access is an administrator's job, not a monitoring
+             capability, so this link follows the role and sits apart. --}}
+        @if ($u->isAdmin())
+            <div>
+                <x-sidebar-link :href="route('monitoring.permissions')" :active="request()->routeIs('monitoring.permissions*')">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    Monitoring Access
+                </x-sidebar-link>
+            </div>
+        @endif
+
         {{-- ACCOUNT --}}
         <div>
             <p class="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Account</p>

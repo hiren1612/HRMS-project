@@ -47,6 +47,21 @@ return [
             'report' => false,
         ],
 
+        /*
+         * Employee Productivity module. Screenshots live here and nowhere
+         * else: no 'url', no 'visibility' => 'public', and deliberately not
+         * listed under 'links' below, so `php artisan storage:link` cannot
+         * expose it. Images are only ever served by an authorised controller
+         * that records who viewed them.
+         */
+        'monitoring' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/monitoring'),
+            'serve' => false,
+            'throw' => false,
+            'report' => false,
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
