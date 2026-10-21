@@ -24,3 +24,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 *.exe
+
+# Word lock files. Opening a .docx in the docs folder creates a ~$ stub
+# beside it; one was committed in 4397b92 before this rule existed.
+~$*
