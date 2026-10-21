@@ -86,3 +86,23 @@
         }
     }
 }
+
+/*
+ * Phone gutter for page content.
+ *
+ * Page bodies use `max-w-* mx-auto sm:px-6 lg:px-8`, so below the sm
+ * breakpoint they carry no horizontal padding at all and cards sit flush
+ * against both edges of the screen. This gives them a 20px gutter up to the
+ * md breakpoint, and overrides the 24px that sm:px-6 would otherwise apply
+ * between 640px and 767px so the spacing does not change twice on the way
+ * down.
+ *
+ * Scoped to <main> on purpose: the top bar and the page heading band are
+ * outside it and keep their own px-4, which is what the design asks for.
+ */
+@media (max-width: 767px) {
+    main > div > .mx-auto {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
