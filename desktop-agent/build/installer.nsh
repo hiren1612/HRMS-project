@@ -15,5 +15,16 @@
 
 !macro customUnInstall
   ; Remove the Run entry so a removed agent cannot come back at next logon.
+  ;
+  ; The value name matters and is easy to get wrong. Electron's
+  ; app.setLoginItemSettings() registers under "electron.app." + the product
+  ; name, not the product name alone. Deleting only the bare name leaves the
+  ; real entry behind, and Windows then tries to launch a deleted executable
+  ; at every logon for the life of the account. Found by uninstalling and
+  ; looking, which is the only way this shows up.
+  ;
+  ; Both names are removed: the one Electron actually writes, and the bare
+  ; one in case the agent is ever changed to register it itself.
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "electron.app.HRMS Tracking Agent"
   DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "HRMS Tracking Agent"
 !macroend
